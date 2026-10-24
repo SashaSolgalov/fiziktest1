@@ -22,8 +22,14 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 .timer-clock.warn {color:#d97706;}
 .timer-clock.danger {color:var(--err); animation: pulse 1s infinite;}
 @keyframes pulse {0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;}}
-.topic-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
-.topic-bar::-webkit-scrollbar{display:none}
+
+/* Полоса прокрутки для тем на компьютере */
+.topic-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;}
+.topic-bar::-webkit-scrollbar {height: 8px;}
+.topic-bar::-webkit-scrollbar-track {background: var(--bg); border-radius: 4px;}
+.topic-bar::-webkit-scrollbar-thumb {background: var(--border); border-radius: 4px;}
+.topic-bar::-webkit-scrollbar-thumb:hover {background: var(--hint);}
+
 .chip{flex:0 0 auto;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:22px;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;color:var(--text)}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .counter{font-size:13px;color:var(--hint);margin-bottom:8px}
