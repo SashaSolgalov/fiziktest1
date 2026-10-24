@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a4fa0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FizikTest">
+<title>FizikTest</title>
+<style>
+:root{
+  --bg:#f5f6fa;--card:#fff;--primary:#1a4fa0;--ok:#1a7f37;--err:#b3261e;
+  --hint:#666;--border:#d9dce3;--radius:14px;--text:#222;
+}
+html[data-theme="dark"]{
+  --bg:#12151c;--card:#1b1f29;--primary:#5b8def;--ok:#4cd07a;--err:#ff6b6b;
+  --hint:#8a93a6;--border:#2c3240;--text:#e8ecf3;
+}
+html[data-theme="pink"]{
+  --bg:#fff0f6;--card:#ffffff;--primary:#d63384;--ok:#1a7f37;--err:#b3261e;
+  --hint:#8a5a72;--border:#f4c6dc;--text:#3a1f2b;
+}
+html[data-theme="blue"]{
+  --bg:#eaf4ff;--card:#ffffff;--primary:#0b6bcb;--ok:#1a7f37;--err:#b3261e;
+  --hint:#4e6b85;--border:#bcd7f2;--text:#0d2236;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text)}
+body{min-height:100vh;padding:12px 12px 140px;font-size:16px;line-height:1.4}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:20px;margin:0;color:var(--primary);line-height:1.2}
+h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margin-top:3px}
+.icon-btn{background:none;border:none;padding:10px;font-size:22px;cursor:pointer;border-radius:8px;color:var(--text)}
+.icon-btn:active{background:var(--border)}
+.card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.topic-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;scrollbar-width:none}
+.topic-bar::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:22px;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;color:var(--text)}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.topic-slider{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:4px 2px 0}
+.topic-slider input[type="range"]{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:var(--border);outline:none}
+.topic-slider input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid var(--card);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.topic-slider input[type="range"]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid var(--card);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.topic-slider .slider-label{font-size:16px;color:var(--primary);min-width:14px;display:inline-block;text-align:center;font-weight:700;line-height:1}
+.counter{font-size:13px;color:var(--hint);margin-bottom:8px}
+.question{font-size:17px;line-height:1.45;margin-bottom:14px;font-weight:500}
+.option{display:flex;align-items:center;width:100%;text-align:left;padding:16px;margin-bottom:10px;background:var(--card);border:2px solid var(--border);border-radius:12px;font-size:16px;cursor:pointer;font-family:inherit;color:var(--text);min-height:56px;transition:all .15s}
+.option:active{transform:scale(.99)}
+.option.selected{border-color:var(--primary);background:rgba(26,79,160,.08)}
+.option.correct{border-color:var(--ok);background:rgba(26,127,55,.12)}
+.option.trap{border-color:var(--err);background:rgba(179,38,30,.10)}
+.option:disabled{cursor:default}
+.option:disabled:not(.correct):not(.trap){opacity:.55}
+#btnCheck{width:100%;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;margin-top:6px;font-family:inherit;cursor:pointer;background:var(--primary);color:#fff;min-height:56px}
+#feedback{display:none;padding:14px;border-radius:12px;font-size:15px;line-height:1.5;margin-top:6px}
+#feedback.show{display:block}
+#feedback.ok{background:rgba(26,127,55,.12);color:var(--ok)}
+#feedback.err{background:rgba(179,38,30,.10);color:var(--err)}
+#feedback strong{display:block;margin-bottom:8px;font-size:16px}
+.theory-box{margin-top:12px;padding:12px;background:rgba(26,79,160,.08);border-radius:10px;color:var(--primary);font-size:14px;line-height:1.5}
+.theory-box code{display:block;background:rgba(26,79,160,.16);padding:8px 10px;border-radius:6px;margin:8px 0;font-size:13px;word-break:break-word;white-space:pre-wrap}
+.fab-bar{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 55%,transparent);display:flex;gap:10px;z-index:10}
+.fab-bar button{flex:1;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;min-height:56px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:var(--card);color:var(--primary);border:2px solid var(--primary)!important}
+.fab-bar button:disabled{opacity:.4;cursor:default}
+.status{position:fixed;left:0;right:0;bottom:90px;text-align:center;font-size:12px;color:var(--hint);pointer-events:none}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;color:var(--text)}
+.modal h2{margin:0 0 14px;font-size:19px;color:var(--primary)}
+.modal pre{background:rgba(26,79,160,.08);padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-break:break-word;font-size:13px;color:var(--primary);margin:8px 0}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:15px;gap:12px}
+.stat-row:last-child{border-bottom:none}
+.stat-row span:last-child{font-weight:600;color:var(--primary);white-space:nowrap}
+.btn-close{width:100%;padding:14px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:16px;font-weight:600;margin-top:16px;cursor:pointer;font-family:inherit}
+.section-title{font-size:13px;text-transform:uppercase;color:var(--hint);margin:14px 0 6px;letter-spacing:.5px}
+.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);min-width:220px;max-width:calc(100vw - 24px);padding:6px;z-index:50;display:none;transform-origin:top right;color:var(--text)}
+.menu.show{display:block;animation:menuIn .15s ease-out}
+@keyframes menuIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:none;border-radius:8px;font-size:15px;font-family:inherit;text-align:left;cursor:pointer;color:var(--text);min-height:48px}
+.menu-item:active{background:var(--border)}
+.menu-danger{color:var(--err)}
+.menu-danger:active{background:rgba(179,38,30,.1)}
+.menu-divider{height:1px;background:var(--border);margin:4px 6px 6px}
+.menu-theme{padding:8px 10px 10px}
+.menu-theme-label{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--hint);margin-bottom:8px}
+.theme-row{display:flex;gap:10px}
+.theme-dot{width:44px;height:44px;border-radius:50%;border:3px solid var(--border);cursor:pointer;padding:0;transition:transform .1s, border-color .15s}
+.theme-dot:active{transform:scale(.93)}
+.theme-dot.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,79,160,.2)}
+.theme-dot[data-theme="light"]{background:#f5f6fa;border-color:#c7ccd8}
+.theme-dot[data-theme="dark"]{background:#1b1f29;border-color:#3a4152}
+.theme-dot[data-theme="pink"]{background:#ffd7e8;border-color:#e39ab9}
+.theme-dot[data-theme="blue"]{background:#cfe4ff;border-color:#8bbcf2}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FizikTest<small>тренажёр по кинематике</small></h1>
+  <div style="position:relative">
+    <button class="icon-btn" id="menuBtn" onclick="toggleMenu(event)" aria-haspopup="true" aria-expanded="false" aria-label="Меню">☰</button>
+    <div id="menu" class="menu" role="menu">
+      <div class="menu-theme" role="none">
+        <div class="menu-theme-label">🎨 Оформление</div>
+        <div class="theme-row">
+          <button type="button" class="theme-dot" data-theme="light" title="Светлая" aria-label="Светлая тема"></button>
+          <button type="button" class="theme-dot" data-theme="dark"  title="Тёмная"  aria-label="Тёмная тема"></button>
+          <button type="button" class="theme-dot" data-theme="pink"  title="Розовая" aria-label="Розовая тема"></button>
+          <button type="button" class="theme-dot" data-theme="blue"  title="Голубая" aria-label="Голубая тема"></button>
+        </div>
+      </div>
+      <div class="menu-divider"></div>
+      <button type="button" class="menu-item" role="menuitem" onclick="menuAction(showSupport)">💬 Поддержать</button>
+      <button type="button" class="menu-item" role="menuitem" onclick="menuAction(showStats)">📊 Статистика</button>
+      <button type="button" class="menu-item menu-danger" role="menuitem" onclick="menuAction(resetAll)">🔄 Сбросить</button>
+    </div>
+  </div>
+</header>
+
+<div class="topic-bar" id="topics"></div>
+<div class="topic-slider">
+  <span class="slider-label" id="sliderPrev"></span>
+  <input type="range" id="topicRange" min="0" max="0" step="1" value="0" aria-label="Переключение темы">
+  <span class="slider-label" id="sliderNext"></span>
+</div>
+
+<div class="card">
+  <div class="counter" id="counter"></div>
+  <div class="question" id="question"></div>
+  <div id="options"></div>
+  <div id="feedback" role="status" aria-live="polite"></div>
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="fab-bar">
+  <button type="button" class="btn-secondary" id="btnTheory" onclick="showTheory()" disabled>📘 Теория</button>
+  <button type="button" class="btn-primary" id="btnNext" onclick="nextTask()" disabled>Следующая →</button>
+</div>
+
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+"use strict";
+
+// ============ БАЗА ЗАДАЧ (55 шт.) ============
+const TASKS = [
+{id:1,topic:"Равномерное движение",text:"Автомобиль едет со скоростью 72 км/ч. Какой путь он проедет за 30 минут?",unit:"км",correct:36,options:["36","2160","2.4","72"],
+ traps:{"2160":{et:"UNITS",c:"Ты не перевёл минуты в часы. 30 мин = 0,5 ч, поэтому s = v·t = 72 · 0,5 = 36 км."},
+        "2.4":{et:"FORMULA",c:"Похоже, ты разделил скорость на время. При равномерном движении путь находится умножением: s = v·t."},
+        "72":{et:"INITIAL_FINAL",c:"72 км/ч — это скорость, а не путь. Путь нужно ещё умножить на время: s = 72 · 0,5."}}},
+{id:2,topic:"Равномерное движение",text:"Переведи скорость 54 км/ч в м/с.",unit:"м/с",correct:15,options:["15","54","194.4","5.4"],
+ traps:{"54":{et:"UNITS",c:"Ты не выполнил перевод: 54 км/ч — это не 54 м/с. Делим на 3,6: 54 : 3,6 = 15 м/с."},
+        "194.4":{et:"UNITS",c:"Ты умножил на 3,6, а надо делить: 1 км/ч = 1/3,6 м/с. 54 : 3,6 = 15 м/с."},
+        "5.4":{et:"UNITS",c:"Ты разделил на 10 вместо 3,6. В 1 км 1000 м, в 1 ч 3600 с, поэтому делим именно на 3,6."}}},
+{id:3,topic:"Равномерное движение",text:"Велосипедист едет со скоростью 5 м/с. Какой путь он проедет за 2 минуты?",unit:"м",correct:600,options:["600","10","0.04","5"],
+ traps:{"10":{et:"UNITS",c:"Ты не перевёл минуты в секунды. 2 мин = 120 с, поэтому s = 5 · 120 = 600 м."},
+        "0.04":{et:"FORMULA",c:"Ты разделил скорость на время. Путь при равномерном движении: s = v·t (умножение)."},
+        "5":{et:"INITIAL_FINAL",c:"5 м/с — это скорость, а не путь. Нужно умножить её на время: s = 5 · 120."}}},
+
+{id:4,topic:"Средняя скорость",text:"Первую половину пути автомобиль проехал со скоростью 60 км/ч, вторую — со скоростью 40 км/ч. Найди среднюю скорость на всём пути.",unit:"км/ч",correct:48,options:["48","50","100","24"],
+ traps:{"50":{et:"AVERAGE",c:"Ты взял среднее арифметическое (60+40)/2. Но пути равные, а времена разные — так нельзя. При равных путях v_ср = 2v₁v₂/(v₁+v₂) = 2·60·40/100 = 48 км/ч."},
+        "100":{et:"FORMULA",c:"Скорости не складываются. Средняя скорость — это весь путь, делённый на всё время: v_ср = (s₁+s₂)/(t₁+t₂)."},
+        "24":{et:"AVERAGE",c:"Похоже, ты разделил среднее арифметическое на 2. При равных путях v_ср = 2v₁v₂/(v₁+v₂) = 48 км/ч."}}},
+{id:5,topic:"Средняя скорость",text:"Первый час автомобиль ехал со скоростью 60 км/ч, второй час — со скоростью 40 км/ч. Найди среднюю скорость за 2 часа.",unit:"км/ч",correct:50,options:["50","48","100","24"],
+ traps:{"48":{et:"AVERAGE",c:"Ты применил формулу для равных путей. Здесь равны времена: v_ср = (v₁t₁+v₂t₂)/(t₁+t₂) = (60+40)/2 = 50 км/ч."},
+        "100":{et:"FORMULA",c:"Скорости не складываются. Нужно весь путь (60+40=100 км) разделить на всё время (2 ч): 100/2 = 50 км/ч."},
+        "24":{et:"AVERAGE",c:"Считаем так: s = 60·1 + 40·1 = 100 км, t = 2 ч, v_ср = 100/2 = 50 км/ч."}}},
+{id:31,topic:"Средняя скорость",text:"Турист шёл 2 ч со скоростью 4 км/ч и ещё 3 ч со скоростью 5 км/ч. Найди среднюю скорость на всём маршруте.",unit:"км/ч",correct:4.6,options:["4.6","4.5","23","9"],
+ traps:{"4.5":{et:"AVERAGE",c:"Ты взял среднее арифметическое (4+5)/2. Но времена разные, поэтому v_ср = (v₁t₁+v₂t₂)/(t₁+t₂) = (8+15)/5 = 4,6 км/ч."},
+        "23":{et:"AVERAGE",c:"23 км — это весь путь (s = 4·2 + 5·3). Нужно ещё разделить на всё время 5 ч: 23/5 = 4,6 км/ч."},
+        "9":{et:"FORMULA",c:"9 — это сумма скоростей (4+5). Скорости складывать нельзя. Сначала путь, потом на всё время."}}},
+{id:32,topic:"Средняя скорость",text:"Половину времени автомобиль ехал со скоростью 80 км/ч, вторую половину — со скоростью 40 км/ч. Найди среднюю скорость.",unit:"км/ч",correct:60,options:["60","53.3","120","30"],
+ traps:{"53.3":{et:"AVERAGE",c:"Ты использовал формулу для равных путей 2v₁v₂/(v₁+v₂) = 53,3. Но здесь равны времена: v_ср = (80+40)/2 = 60 км/ч."},
+        "120":{et:"FORMULA",c:"120 — это сумма скоростей. Скорости складывать нельзя: средняя скорость = (v₁t₁+v₂t₂)/(t₁+t₂) = 60 км/ч."},
+        "30":{et:"AVERAGE",c:"30 — это среднее арифметическое, делённое на 2. Средняя скорость = (80+40)/2 = 60 км/ч."}}},
+
+{id:6,topic:"Относительность движения",text:"Два поезда идут навстречу друг другу со скоростями 20 м/с и 30 м/с. Расстояние между ними 500 м. Через какое время они встретятся?",unit:"с",correct:10,options:["10","50","25","16.7"],
+ traps:{"50":{et:"VECTOR",c:"Ты вычел скорости. При встречном движении скорости складываются: v = 20+30 = 50 м/с, тогда t = 500/50 = 10 с."},
+        "25":{et:"VECTOR",c:"Ты учёл скорость только одного поезда. При сближении навстречу скорости складываются: t = 500/50 = 10 с."},
+        "16.7":{et:"FORMULA",c:"Похоже, ты разделил расстояние только на скорость второго поезда. Нужна сумма скоростей: t = 500/(20+30) = 10 с."}}},
+{id:7,topic:"Относительность движения",text:"Догоняющий поезд идёт со скоростью 30 м/с, впереди него — поезд со скоростью 20 м/с. Расстояние между ними 200 м. Через какое время первый догонит второй?",unit:"с",correct:20,options:["20","4","6.7","10"],
+ traps:{"4":{et:"VECTOR",c:"Ты сложил скорости, как при встречном движении. При движении вдогонку скорости вычитаются: v = 10 м/с, t = 200/10 = 20 с."},
+        "6.7":{et:"VECTOR",c:"Ты учёл только догоняющий поезд. Нужна относительная скорость: v = 30−20 = 10 м/с, t = 200/10 = 20 с."},
+        "10":{et:"FORMULA",c:"10 м/с — это относительная скорость, а не время. Время: t = s/v = 200/10 = 20 с."}}},
+{id:33,topic:"Относительность движения",text:"Два автомобиля едут в одном направлении со скоростями 90 км/ч и 60 км/ч. Расстояние между ними 30 км. Через какое время первый догонит второй?",unit:"ч",correct:1,options:["1","0.2","0.5","0.33"],
+ traps:{"0.2":{et:"VECTOR",c:"Ты сложил скорости (90+60 = 150). При движении вдогонку скорости вычитаются: v_отн = 30 км/ч, t = 30/30 = 1 ч."},
+        "0.5":{et:"VECTOR",c:"Ты разделил расстояние на скорость второго (30/60 = 0,5). Нужна относительная скорость: 90−60 = 30, t = 30/30 = 1 ч."},
+        "0.33":{et:"VECTOR",c:"Ты разделил на скорость первого (30/90 ≈ 0,33). Нужна относительная скорость: 90−60 = 30, t = 30/30 = 1 ч."}}},
+{id:34,topic:"Относительность движения",text:"Две машины едут навстречу друг другу со скоростями 20 м/с и 15 м/с. Расстояние между ними 350 м. Через какое время они встретятся?",unit:"с",correct:10,options:["10","70","17.5","23.3"],
+ traps:{"70":{et:"VECTOR",c:"Ты вычел скорости (20−15 = 5). При встречном движении скорости складываются: 20+15 = 35, t = 350/35 = 10 с."},
+        "17.5":{et:"VECTOR",c:"Ты учёл только скорость первой машины: 350/20 = 17,5 с. Нужна сумма скоростей: 350/35 = 10 с."},
+        "23.3":{et:"VECTOR",c:"Ты учёл только скорость второй машины: 350/15 ≈ 23,3 с. Нужна сумма скоростей: 350/35 = 10 с."}}},
+
+{id:8,topic:"Графики движения",text:"Уравнение движения тела: x = 5 + 2t (м). Чему равна скорость тела?",unit:"м/с",correct:2,options:["2","5","7","0"],
+ traps:{"5":{et:"INITIAL_FINAL",c:"5 — это начальная координата x₀, а не скорость. Скорость — коэффициент при t, то есть 2 м/с."},
+        "7":{et:"FORMULA",c:"Ты сложил начальную координату и скорость. В уравнении x = x₀ + v·t скорость — только коэффициент при t: v = 2 м/с."},
+        "0":{et:"GRAPH",c:"Тело не покоится: координата меняется со временем. Коэффициент при t равен 2, значит v = 2 м/с."}}},
+{id:35,topic:"Графики движения",text:"Уравнение движения: x = 10 − 3t (м). Чему равна скорость тела?",unit:"м/с",correct:-3,options:["-3","3","10","13"],
+ traps:{"3":{et:"SIGN",c:"Потерян знак: коэффициент при t равен −3, значит тело движется в отрицательном направлении оси. v = −3 м/с."},
+        "10":{et:"INITIAL_FINAL",c:"10 — это начальная координата x₀, а не скорость. Скорость — коэффициент при t: v = −3 м/с."},
+        "13":{et:"FORMULA",c:"Ты сложил 10 и 3. Скорость — только коэффициент при t, то есть −3 м/с."}}},
+{id:36,topic:"Графики движения",text:"Уравнение движения: x = −5 + 2t (м). Чему равна начальная координата?",unit:"м",correct:-5,options:["-5","5","2","7"],
+ traps:{"5":{et:"SIGN",c:"Потерян знак: начальная координата x₀ = −5 м (минус в уравнении — это часть числа)."},
+        "2":{et:"INITIAL_FINAL",c:"2 — это скорость, а не координата. Начальная координата — это свободный член уравнения: x₀ = −5 м."},
+        "7":{et:"FORMULA",c:"Ты сложил числа из уравнения. x₀ — это только свободный член: x₀ = −5 м."}}},
+{id:37,topic:"Графики движения",text:"Уравнение движения: x = 3 + 6t (м). Через какое время координата тела станет равной 21 м?",unit:"с",correct:3,options:["3","21","18","6"],
+ traps:{"21":{et:"FORMULA",c:"Ты взял конечную координату как время. Нужно решить уравнение: 3 + 6t = 21 → 6t = 18 → t = 3 с."},
+        "18":{et:"FORMULA",c:"18 — это 6t (пройденный отрезок), но не время. Раздели на скорость: t = 18/6 = 3 с."},
+        "6":{et:"INITIAL_FINAL",c:"6 — это скорость, а не время. Время: t = (21−3)/6 = 3 с."}}},
+
+{id:9,topic:"Ускорение",text:"Скорость тела выросла с 2 м/с до 10 м/с за 4 с. Найди ускорение.",unit:"м/с²",correct:2,options:["2","3","2.5","4"],
+ traps:{"3":{et:"FORMULA",c:"Ты сложил конечную и начальную скорости. Ускорение: a = (v − v₀)/t = (10−2)/4 = 2 м/с²."},
+        "2.5":{et:"FORMULA",c:"Ты забыл начальную скорость: 10/4 = 2,5. Правильно: a = (v − v₀)/t = (10−2)/4 = 2 м/с²."},
+        "4":{et:"INITIAL_FINAL",c:"4 — это время, а не ускорение. a = (v − v₀)/t = (10−2)/4 = 2 м/с²."}}},
+{id:10,topic:"Ускорение",text:"Автомобиль, двигаясь со скоростью 20 м/с, останавливается за 5 с. Найди ускорение (с учётом знака).",unit:"м/с²",correct:-4,options:["-4","4","100","0"],
+ traps:{"4":{et:"SIGN",c:"Потерян знак: при торможении ускорение направлено против скорости, поэтому a = (0−20)/5 = −4 м/с²."},
+        "100":{et:"FORMULA",c:"100 — это произведение скорости на время. Ускорение: a = (v − v₀)/t = (0−20)/5 = −4 м/с²."},
+        "0":{et:"SIGN",c:"Тело тормозит, значит скорость меняется, и ускорение не равно нулю: a = (0−20)/5 = −4 м/с²."}}},
+{id:38,topic:"Ускорение",text:"Скорость тела за 5 с выросла от 3 м/с до 18 м/с. Найди ускорение.",unit:"м/с²",correct:3,options:["3","4.2","0.6","3.6"],
+ traps:{"4.2":{et:"FORMULA",c:"Ты сложил скорости (3+18 = 21) и разделил на время. Ускорение: a = (v−v₀)/t = 15/5 = 3 м/с²."},
+        "0.6":{et:"FORMULA",c:"Ты разделил только начальную скорость: 3/5 = 0,6. Нужно (v−v₀)/t = 15/5 = 3 м/с²."},
+        "3.6":{et:"FORMULA",c:"Ты разделил конечную скорость: 18/5 = 3,6. Нужна разность: (18−3)/5 = 3 м/с²."}}},
+{id:39,topic:"Ускорение",text:"Тело движется с ускорением 4 м/с². Начальная скорость 5 м/с. Какова скорость через 3 с?",unit:"м/с",correct:17,options:["17","5","27","12"],
+ traps:{"5":{et:"FORMULA",c:"Ты не прибавил изменение скорости at. v = v₀ + at = 5 + 4·3 = 17 м/с."},
+        "27":{et:"FORMULA",c:"Ты посчитал (v₀+a)·t = 9·3 = 27. Формула другая: v = v₀ + at = 17 м/с."},
+        "12":{et:"INITIAL_FINAL",c:"12 — это только at (4·3). Нужно прибавить начальную скорость: v = 5 + 12 = 17 м/с."}}},
+
+{id:11,topic:"Равноускоренное движение",text:"Тело начинает движение из состояния покоя с ускорением 3 м/с². Какой путь оно пройдёт за 4 с?",unit:"м",correct:24,options:["24","48","12","6"],
+ traps:{"48":{et:"FORMULA",c:"Забыт коэффициент 1/2: s = at²/2 = 3·16/2 = 24 м, а не at² = 48 м."},
+        "12":{et:"INITIAL_FINAL",c:"12 м/с — это конечная скорость (v = at = 3·4), а не путь. Путь: s = at²/2 = 24 м."},
+        "6":{et:"FORMULA",c:"Ты разделил at на 2, но не возвёл время в квадрат. Правильно: s = at²/2 = 24 м."}}},
+{id:12,topic:"Равноускоренное движение",text:"Тело разгоняется из состояния покоя с ускорением 2 м/с² и проходит 100 м. Какую скорость оно приобретёт?",unit:"м/с",correct:20,options:["20","200","10","40"],
+ traps:{"200":{et:"FORMULA",c:"Ты использовал v = as вместо v = √(2as). Правильно: v² = 2as = 400, v = √400 = 20 м/с."},
+        "10":{et:"INITIAL_FINAL",c:"10 м/с — это средняя скорость (v_ср = v/2), а не конечная. Конечная скорость: v = √(2as) = 20 м/с."},
+        "40":{et:"FORMULA",c:"Похоже, ты умножил результат на 2. Правильно: v = √(2as) = √(2·2·100) = 20 м/с."}}},
+{id:13,topic:"Равноускоренное движение",text:"Тело движется со скоростью 10 м/с и ускорением 2 м/с². Какова его скорость через 5 с?",unit:"м/с",correct:20,options:["20","10","15","60"],
+ traps:{"10":{et:"FORMULA",c:"Ты не прибавил изменение скорости at. v = v₀ + at = 10 + 2·5 = 20 м/с."},
+        "15":{et:"AVERAGE",c:"15 м/с — это средняя скорость (v₀+v)/2, а не конечная. Конечная: v = v₀ + at = 20 м/с."},
+        "60":{et:"FORMULA",c:"Ты умножил (v₀+a) на t или использовал t² вместо t. Правильно: v = v₀ + at = 10 + 2·5 = 20 м/с."}}},
+{id:14,topic:"Равноускоренное движение",text:"Тело тормозит с ускорением −2 м/с², начальная скорость 10 м/с. Какой путь оно пройдёт за 3 с?",unit:"м",correct:21,options:["21","39","30","9"],
+ traps:{"39":{et:"SIGN",c:"Потерян знак ускорения: s = v₀t + at²/2 = 30 + (−9) = 21 м, а не 39 м."},
+        "30":{et:"FORMULA",c:"Ты забыл про ускорение и посчитал s = v₀t. Нужно учесть торможение: s = 30 − 9 = 21 м."},
+        "9":{et:"FORMULA",c:"9 м — это только «потерянный» путь at²/2. Полный путь: s = v₀t − at²/2 = 21 м."}}},
+{id:16,topic:"Равноускоренное движение",text:"Тело разгоняется из состояния покоя до 20 м/с за 8 с. Какой путь оно прошло?",unit:"м",correct:80,options:["80","160","10","40"],
+ traps:{"160":{et:"FORMULA",c:"Ты умножил конечную скорость на время (v·t). Но скорость растёт от 0 до 20, поэтому s = v_ср·t = 10·8 = 80 м."},
+        "10":{et:"AVERAGE",c:"10 м/с — это средняя скорость, а не путь. Путь: s = v_ср·t = 10·8 = 80 м."},
+        "40":{et:"FORMULA",c:"Ты взял половину времени. Правильно: s = v_ср·t = (0+20)/2 · 8 = 80 м."}}},
+
+{id:15,topic:"Тормозной путь",text:"Автомобиль движется со скоростью 20 м/с и тормозит с ускорением −5 м/с². Какой путь он пройдёт до полной остановки?",unit:"м",correct:40,options:["40","80","4","100"],
+ traps:{"80":{et:"FORMULA",c:"Забыт коэффициент 1/2: s = v₀²/(2·|a|) = 400/(2·5) = 40 м, а не 80 м."},
+        "4":{et:"INITIAL_FINAL",c:"4 с — это время торможения (t = v₀/|a|), а не путь. Путь: s = v₀²/(2·|a|) = 40 м."},
+        "100":{et:"FORMULA",c:"100 м получится, если разделить v₀² на 4. Правильно: s = v₀²/(2·|a|) = 400/10 = 40 м."}}},
+{id:40,topic:"Тормозной путь",text:"Автомобиль, движущийся со скоростью 30 м/с, начинает тормозить. Тормозной путь 45 м. Найди ускорение (с учётом знака).",unit:"м/с²",correct:-10,options:["-10","10","-20","20"],
+ traps:{"10":{et:"SIGN",c:"Потерян знак: при торможении ускорение направлено против скорости, поэтому a = −v₀²/(2s) = −900/90 = −10 м/с²."},
+        "-20":{et:"FORMULA",c:"Забыт коэффициент 2: a = −v₀²/(2s) = −900/90 = −10 м/с², а не −20."},
+        "20":{et:"SIGN",c:"Две ошибки: потерян знак и коэффициент 2. Правильно: a = −v₀²/(2s) = −10 м/с²."}}},
+{id:41,topic:"Тормозной путь",text:"Автомобиль тормозит с ускорением −4 м/с² и проходит до остановки 50 м. Какой была начальная скорость?",unit:"м/с",correct:20,options:["20","400","10","200"],
+ traps:{"400":{et:"FORMULA",c:"400 — это v₀², а не v₀. Нужно извлечь корень: v₀ = √400 = 20 м/с."},
+        "10":{et:"FORMULA",c:"Ты разделил v₀² на 4 случайно (400/40). Правильно: v₀ = √(2·|a|·s) = √400 = 20 м/с."},
+        "200":{et:"FORMULA",c:"Ты забыл коэффициент 2: 2·|a|·s = 400, √400 = 20 м/с, а не 200."}}},
+{id:42,topic:"Тормозной путь",text:"Автомобиль начинает тормозить со скорости 30 м/с. Ускорение −5 м/с². Какой путь он пройдёт до полной остановки?",unit:"м",correct:90,options:["90","180","6","60"],
+ traps:{"180":{et:"FORMULA",c:"Забыт коэффициент 2 в знаменателе: s = v₀²/(2·|a|) = 900/10 = 90 м, а не 900/5 = 180 м."},
+        "6":{et:"INITIAL_FINAL",c:"6 с — это время торможения (t = v₀/|a| = 30/5). Путь: s = v₀²/(2·|a|) = 90 м."},
+        "60":{et:"FORMULA",c:"Похоже, ты умножил v₀ на неверное время (30·2 = 60). Путь: s = v₀²/(2·|a|) = 90 м."}}},
+
+{id:17,topic:"Графики скорости",text:"По графику v(t): скорость тела за 5 с выросла от 0 до 15 м/с. Найди ускорение.",unit:"м/с²",correct:3,options:["3","15","0.33","75"],
+ traps:{"15":{et:"INITIAL_FINAL",c:"15 м/с — это конечная скорость, а не ускорение. a = Δv/Δt = 15/5 = 3 м/с²."},
+        "0.33":{et:"FORMULA",c:"Ты разделил время на скорость. Ускорение — это скорость, делённая на время: a = 15/5 = 3 м/с²."},
+        "75":{et:"GRAPH",c:"75 — это площадь под графиком (путь), а не ускорение. Ускорение — наклон: a = Δv/Δt = 3 м/с²."}}},
+{id:18,topic:"Графики скорости",text:"По графику v(t): первые 4 с скорость 5 м/с, затем за следующие 4 с она растёт от 5 до 15 м/с. Какой путь пройден за 8 с?",unit:"м",correct:60,options:["60","20","40","120"],
+ traps:{"20":{et:"GRAPH",c:"Ты учёл только первый участок (5·4 = 20 м). Нужно прибавить площадь второго: 20 + 40 = 60 м."},
+        "40":{et:"GRAPH",c:"Ты учёл только второй участок ((5+15)/2·4 = 40 м). Нужно прибавить и первый: 20 + 40 = 60 м."},
+        "120":{et:"GRAPH",c:"Ты взял максимальную скорость 15 м/с на всё время. Путь — площадь под графиком: 20 + 40 = 60 м."}}},
+{id:30,topic:"Графики скорости",text:"По графику v(t) скорость тела выросла с 10 м/с до 30 м/с за 5 с. Найди ускорение.",unit:"м/с²",correct:4,options:["4","6","2","30"],
+ traps:{"6":{et:"FORMULA",c:"Ты разделил конечную скорость на время, забыв про начальную. a = (v − v₀)/t = (30−10)/5 = 4 м/с²."},
+        "2":{et:"FORMULA",c:"Ты разделил только начальную скорость на время. a = (v − v₀)/t = 20/5 = 4 м/с²."},
+        "30":{et:"INITIAL_FINAL",c:"30 м/с — это конечная скорость, а не ускорение. a = Δv/Δt = 20/5 = 4 м/с²."}}},
+
+{id:19,topic:"Свободное падение",text:"Тело падает с высоты 20 м без начальной скорости (g = 10 м/с²). Сколько времени длится падение?",unit:"с",correct:2,options:["2","4","1","20"],
+ traps:{"4":{et:"FORMULA",c:"Забыт корень: h = gt²/2, значит t = √(2h/g) = √4 = 2 с, а не 4 с."},
+        "1":{et:"FORMULA",c:"Ты перепутал формулу. t = √(2h/g) = √(2·20/10) = √4 = 2 с."},
+        "20":{et:"INITIAL_FINAL",c:"20 — это высота в метрах, а не время. Считаем: t = √(2h/g) = 2 с."}}},
+{id:20,topic:"Свободное падение",text:"Тело свободно падает 3 с без начальной скорости (g = 10 м/с²). Какой путь оно пройдёт?",unit:"м",correct:45,options:["45","90","30","15"],
+ traps:{"90":{et:"FORMULA",c:"Забыт коэффициент 1/2: h = gt²/2 = 10·9/2 = 45 м, а не gt² = 90 м."},
+        "30":{et:"FORMULA",c:"Ты взял gt = 30 м/с — это скорость, а не путь. Путь: h = gt²/2 = 45 м."},
+        "15":{et:"AVERAGE",c:"15 м/с — это средняя скорость. Путь: h = v_ср·t = 15·3 = 45 м."}}},
+{id:43,topic:"Свободное падение",text:"Тело падает с высоты 45 м без начальной скорости (g = 10 м/с²). Сколько времени длится падение?",unit:"с",correct:3,options:["3","9","4.5","45"],
+ traps:{"9":{et:"FORMULA",c:"9 — это t² (2h/g = 9), но не t. Нужно извлечь корень: t = √9 = 3 с."},
+        "4.5":{et:"FORMULA",c:"Ты разделил 9 на 2. Правильно: t = √(2h/g) = √9 = 3 с."},
+        "45":{et:"INITIAL_FINAL",c:"45 — это высота в метрах, а не время. t = √(2·45/10) = 3 с."}}},
+{id:44,topic:"Свободное падение",text:"Тело падает с высоты 45 м без начальной скорости (g = 10 м/с²). Какова его скорость при ударе о землю?",unit:"м/с",correct:30,options:["30","900","15","45"],
+ traps:{"900":{et:"FORMULA",c:"900 — это v² (v² = 2gh). Нужно извлечь корень: v = √900 = 30 м/с."},
+        "15":{et:"AVERAGE",c:"15 м/с — это средняя скорость (v/2), а не конечная. Конечная: v = √(2gh) = 30 м/с."},
+        "45":{et:"INITIAL_FINAL",c:"45 — это высота в метрах, а не скорость. v = √(2gh) = 30 м/с."}}},
+
+{id:21,topic:"Бросок вертикально вверх",text:"Тело брошено вертикально вверх со скоростью 20 м/с (g = 10 м/с²). На какую максимальную высоту оно поднимется?",unit:"м",correct:20,options:["20","40","2","10"],
+ traps:{"40":{et:"FORMULA",c:"Забыт коэффициент 1/2: H = v₀²/(2g) = 400/20 = 20 м, а не v₀²/g = 40 м."},
+        "2":{et:"INITIAL_FINAL",c:"2 с — это время подъёма (t = v₀/g), а не высота. Высота: H = v₀²/(2g) = 20 м."},
+        "10":{et:"FORMULA",c:"10 м/с — это средняя скорость на подъёме. Высота: H = v_ср·t = 10·2 = 20 м."}}},
+{id:22,topic:"Бросок вертикально вверх",text:"Тело брошено вертикально вверх со скоростью 20 м/с (g = 10 м/с²). Через какое время оно окажется в верхней точке?",unit:"с",correct:2,options:["2","4","20","0.5"],
+ traps:{"4":{et:"INITIAL_FINAL",c:"4 с — это полное время полёта (вверх и вниз). До верхней точки: t = v₀/g = 2 с."},
+        "20":{et:"INITIAL_FINAL",c:"20 — это скорость в м/с, а не время. t = v₀/g = 20/10 = 2 с."},
+        "0.5":{et:"FORMULA",c:"Ты перевернул формулу. t = v₀/g = 20/10 = 2 с."}}},
+{id:45,topic:"Бросок вертикально вверх",text:"Тело брошено вертикально вверх со скоростью 30 м/с (g = 10 м/с²). Какова его скорость через 2 с?",unit:"м/с",correct:10,options:["10","30","20","50"],
+ traps:{"30":{et:"FORMULA",c:"Ты не учёл ускорение. v = v₀ − gt = 30 − 20 = 10 м/с."},
+        "20":{et:"SIGN",c:"Ты забыл умножить на t или неверно подставил: v = v₀ − gt = 30 − 20 = 10 м/с."},
+        "50":{et:"SIGN",c:"Ты прибавил gt вместо вычитания. При подъёме скорость убывает: v = 30 − 20 = 10 м/с."}}},
+{id:46,topic:"Бросок вертикально вверх",text:"Тело брошено вертикально вверх со скоростью 20 м/с (g = 10 м/с²). Сколько времени оно будет в полёте до возврата в исходную точку?",unit:"с",correct:4,options:["4","2","20","8"],
+ traps:{"2":{et:"INITIAL_FINAL",c:"2 с — это время только до верхней точки. Полное время: t = 2v₀/g = 4 с."},
+        "20":{et:"INITIAL_FINAL",c:"20 — это начальная скорость, а не время. t = 2v₀/g = 4 с."},
+        "8":{et:"FORMULA",c:"8 — это удвоенное время подъёма. Правильно: t = 2v₀/g = 4 с."}}},
+
+{id:23,topic:"Бросок вертикально вниз",text:"Тело брошено вниз со скоростью 5 м/с. Какой путь оно пройдёт за 2 с (g = 10 м/с²)?",unit:"м",correct:30,options:["30","20","10","40"],
+ traps:{"20":{et:"FORMULA",c:"Ты забыл про начальную скорость: s = v₀t + gt²/2 = 10 + 20 = 30 м."},
+        "10":{et:"FORMULA",c:"10 м — это только v₀t. Нужно прибавить gt²/2 = 20 м: s = 30 м."},
+        "40":{et:"FORMULA",c:"Забыт коэффициент 1/2: gt² = 40 м — слишком много. s = v₀t + gt²/2 = 30 м."}}},
+{id:47,topic:"Бросок вертикально вниз",text:"Тело брошено вниз со скоростью 10 м/с. Какой путь оно пройдёт за 3 с (g = 10 м/с²)?",unit:"м",correct:75,options:["75","45","30","90"],
+ traps:{"45":{et:"FORMULA",c:"45 м — это только gt²/2. Нужно прибавить v₀t = 30 м: s = 75 м."},
+        "30":{et:"FORMULA",c:"30 м — это только v₀t. Нужно прибавить gt²/2 = 45 м: s = 75 м."},
+        "90":{et:"FORMULA",c:"Забыт коэффициент 1/2: s = v₀t + gt²/2 = 30 + 45 = 75 м, а не 90."}}},
+{id:48,topic:"Бросок вертикально вниз",text:"Тело брошено вниз со скоростью 3 м/с. Какова его скорость через 2 с (g = 10 м/с²)?",unit:"м/с",correct:23,options:["23","20","3","26"],
+ traps:{"20":{et:"FORMULA",c:"Ты забыл начальную скорость: v = v₀ + gt = 3 + 20 = 23 м/с."},
+        "3":{et:"FORMULA",c:"Ты не прибавил gt. v = v₀ + gt = 3 + 20 = 23 м/с."},
+        "26":{et:"FORMULA",c:"Ты прибавил v₀ дважды (3+3+20). Правильно: v = 3 + 20 = 23 м/с."}}},
+{id:49,topic:"Бросок вертикально вниз",text:"Тело брошено вниз со скоростью 10 м/с. Какой путь оно пройдёт за 1 с (g = 10 м/с²)?",unit:"м",correct:15,options:["15","5","10","20"],
+ traps:{"5":{et:"FORMULA",c:"5 м — это только gt²/2. Нужно прибавить v₀t = 10 м: s = 15 м."},
+        "10":{et:"FORMULA",c:"10 м — это только v₀t. Нужно прибавить gt²/2 = 5 м: s = 15 м."},
+        "20":{et:"FORMULA",c:"Ты взял gt² без коэффициента 1/2: s = 10 + 10 = 20. Правильно: s = 10 + 5 = 15 м."}}},
+
+{id:24,topic:"Горизонтальный бросок",text:"Тело брошено горизонтально со скоростью 10 м/с с высоты 20 м (g = 10 м/с²). Найди дальность полёта.",unit:"м",correct:20,options:["20","10","40","2"],
+ traps:{"10":{et:"FORMULA",c:"Похоже, ты разделил на 2 по аналогии со средней скоростью. При горизонтальном броске L = v₀·t (без деления на 2). t = √(2h/g) = 2 с, L = 10·2 = 20 м."},
+        "40":{et:"FORMULA",c:"Ты удвоил время или скорость. t = √(2h/g) = 2 с, L = 10·2 = 20 м."},
+        "2":{et:"INITIAL_FINAL",c:"2 с — это время падения, а не дальность. Дальность: L = v₀·t = 20 м."}}},
+{id:50,topic:"Горизонтальный бросок",text:"Тело брошено горизонтально со скоростью 10 м/с с высоты 45 м (g = 10 м/с²). Найди дальность полёта.",unit:"м",correct:30,options:["30","15","45","3"],
+ traps:{"15":{et:"FORMULA",c:"Похоже, ты разделил на 2. При горизонтальном броске L = v₀·t, t = √(2h/g) = 3 с, L = 30 м."},
+        "45":{et:"INITIAL_FINAL",c:"45 — это высота, а не дальность. Дальность: L = v₀·√(2h/g) = 10·3 = 30 м."},
+        "3":{et:"INITIAL_FINAL",c:"3 с — это время падения, а не дальность. Дальность: L = 10·3 = 30 м."}}},
+{id:51,topic:"Горизонтальный бросок",text:"Тело брошено горизонтально со скоростью 20 м/с с высоты 20 м (g = 10 м/с²). Сколько времени оно летит до земли?",unit:"с",correct:2,options:["2","4","20","1"],
+ traps:{"4":{et:"FORMULA",c:"Забыт корень: t = √(2h/g) = √4 = 2 с, а не 4 с."},
+        "20":{et:"INITIAL_FINAL",c:"20 — это высота в метрах, а не время. t = √(2·20/10) = 2 с."},
+        "1":{et:"FORMULA",c:"Ты взял половину. Правильно: t = √(2·20/10) = 2 с."}}},
+{id:52,topic:"Горизонтальный бросок",text:"Тело брошено горизонтально со скоростью 5 м/с с высоты 20 м (g = 10 м/с²). Найди дальность полёта.",unit:"м",correct:10,options:["10","20","5","2.5"],
+ traps:{"20":{et:"INITIAL_FINAL",c:"20 — это высота, а не дальность. Дальность: L = v₀·√(2h/g) = 5·2 = 10 м."},
+        "5":{et:"FORMULA",c:"5 — это скорость, а не дальность. Дальность: L = v₀·t = 5·2 = 10 м."},
+        "2.5":{et:"FORMULA",c:"Ты разделил на 2. При горизонтальном броске L = v₀·t (без деления на 2) = 10 м."}}},
+
+{id:25,topic:"Бросок под углом к горизонту",text:"Тело брошено под углом 30° к горизонту со скоростью 20 м/с (g = 10 м/с²). Найди максимальную высоту подъёма.",unit:"м",correct:5,options:["5","15","20","10"],
+ traps:{"15":{et:"SIN_COS",c:"Перепутаны sin и cos: H = v₀²sin²α/(2g). sin30° = 0,5, значит H = 400·0,25/20 = 5 м."},
+        "20":{et:"SIN_COS",c:"Ты не учёл угол: H = v₀²sin²α/(2g) = 400·0,25/20 = 5 м, а не v₀²/(2g)."},
+        "10":{et:"FORMULA",c:"v₀sinα = 10 м/с — это скорость, а не высота. H = v₀²sin²α/(2g) = 5 м."}}},
+{id:26,topic:"Бросок под углом к горизонту",text:"Тело брошено под углом 45° к горизонту со скоростью 20 м/с (g = 10 м/с²). Найди дальность полёта.",unit:"м",correct:40,options:["40","20","28.3","80"],
+ traps:{"20":{et:"SIN_COS",c:"Ты возвёл sinα в квадрат вместо sin(2α). Дальность: L = v₀²sin2α/g = 400·sin90°/10 = 40 м."},
+        "28.3":{et:"SIN_COS",c:"Ты взял cos45° вместо sin90°: L = v₀²sin2α/g = 400·1/10 = 40 м."},
+        "80":{et:"FORMULA",c:"Забыт коэффициент: L = v₀²sin2α/g = 400·1/10 = 40 м, а не 80 м."}}},
+{id:27,topic:"Бросок под углом к горизонту",text:"Тело брошено под углом 60° к горизонту со скоростью 20 м/с (g = 10 м/с²). Найди максимальную высоту подъёма.",unit:"м",correct:15,options:["15","5","20","10"],
+ traps:{"5":{et:"SIN_COS",c:"Перепутаны sin и cos: sin60° ≈ 0,866, H = v₀²sin²α/(2g) = 400·0,75/20 = 15 м."},
+        "20":{et:"SIN_COS",c:"Ты не учёл угол: H = v₀²sin²α/(2g) = 400·0,75/20 = 15 м."},
+        "10":{et:"FORMULA",c:"v₀sinα ≈ 17,3 м/с — это скорость, а не высота. H = v₀²sin²α/(2g) = 15 м."}}},
+
+{id:28,topic:"Сложение скоростей",text:"Лодка движется со скоростью 4 м/с перпендикулярно берегу, течение реки — 3 м/с. Найди модуль результирующей скорости лодки.",unit:"м/с",correct:5,options:["5","7","1","3.5"],
+ traps:{"7":{et:"VECTOR",c:"Скорости перпендикулярны, поэтому складываются векторно: v = √(4²+3²) = 5 м/с, а не 4+3."},
+        "1":{et:"VECTOR",c:"Ты вычел скорости. При перпендикулярном движении v = √(v₁²+v₂²) = 5 м/с."},
+        "3.5":{et:"AVERAGE",c:"Ты взял среднее арифметическое. Для перпендикулярных скоростей: v = √(16+9) = 5 м/с."}}},
+{id:29,topic:"Сложение скоростей",text:"Ширина реки 60 м. Лодка плывёт со скоростью 4 м/с перпендикулярно берегу, течение 3 м/с. За какое время лодка переправится?",unit:"с",correct:15,options:["15","12","20","8.6"],
+ traps:{"12":{et:"VECTOR",c:"Ты использовал результирующую скорость 5 м/с. Но течение не помогает переплыть: t = S/v_лодки = 60/4 = 15 с."},
+        "20":{et:"VECTOR",c:"Ты использовал скорость течения. Время переправы зависит от скорости лодки: t = 60/4 = 15 с."},
+        "8.6":{et:"VECTOR",c:"Ты сложил скорости (4+3=7) и разделил ширину на 7. Переправа: t = S/v_лодки = 60/4 = 15 с."}}},
+{id:53,topic:"Сложение скоростей",text:"Катер плывёт по течению. Собственная скорость катера 10 м/с, скорость течения 3 м/с. Найди результирующую скорость.",unit:"м/с",correct:13,options:["13","7","10","6.5"],
+ traps:{"7":{et:"VECTOR",c:"Ты вычел скорости (как против течения). По течению: v = 10+3 = 13 м/с."},
+        "10":{et:"VECTOR",c:"Ты не учёл течение. По течению: v = 10+3 = 13 м/с."},
+        "6.5":{et:"AVERAGE",c:"Ты взял среднее арифметическое. По течению: v = 10+3 = 13 м/с."}}},
+{id:54,topic:"Сложение скоростей",text:"Катер плывёт против течения. Собственная скорость 10 м/с, скорость течения 3 м/с. Найди результирующую скорость.",unit:"м/с",correct:7,options:["7","13","10","3"],
+ traps:{"13":{et:"VECTOR",c:"Ты сложил скорости (как по течению). Против течения: v = 10−3 = 7 м/с."},
+        "10":{et:"VECTOR",c:"Ты не учёл течение. Против течения: v = 10−3 = 7 м/с."},
+        "3":{et:"VECTOR",c:"3 м/с — это скорость течения, а не катера. Результирующая: 10−3 = 7 м/с."}}},
+{id:55,topic:"Сложение скоростей",text:"Самолёт летит на север со скоростью 300 км/ч. Ветер дует на восток со скоростью 400 км/ч. Найди результирующую скорость самолёта.",unit:"км/ч",correct:500,options:["500","700","100","350"],
+ traps:{"700":{et:"VECTOR",c:"Ты сложил скорости. Они перпендикулярны, поэтому складываются по теореме Пифагора: v = √(300²+400²) = 500 км/ч."},
+        "100":{et:"VECTOR",c:"Ты вычел скорости. Векторы перпендикулярны — нужно √(300²+400²) = 500 км/ч."},
+        "350":{et:"AVERAGE",c:"Ты взял среднее арифметическое. Для перпендикулярных скоростей: v = √(300²+400²) = 500 км/ч."}}}
+];
+
+// ============ МИНИ-ТЕОРИЯ ============
+const THEORY = {
+UNITS:{f:"1 км/ч = 1/3,6 м/с;  1 мин = 60 с;  1 км = 1000 м",t:"Все величины подставляются в формулу в единицах СИ: путь — в метрах, время — в секундах, скорость — в м/с. Если в задаче есть км/ч и минуты, сначала переведи обе величины в СИ."},
+FORMULA:{f:"s = v·t;  v = s/t;  v = v₀ + at;  s = v₀t + at²/2;  s = (v² − v₀²)/(2a)",t:"Прежде чем считать, выпиши, какая величина дана и какая иском. Подбирай формулу, в которой ровно эти величины. Не подставляй скорость вместо пути и путь вместо скорости."},
+SIGN:{f:"торможение: a < 0,  s = v₀t − |a|t²/2",t:"Если тело тормозит, ускорение направлено против скорости, поэтому подставляется со знаком минус. Скорость при торможении уменьшается: v = v₀ − |a|t."},
+SIN_COS:{f:"v₀ₓ = v₀cosα;  v₀ᵧ = v₀sinα;  H = v₀²sin²α/(2g);  L = v₀²sin2α/g",t:"При броске под углом α высота считается через синус, а дальность — через sin(2α). Если получается не то, проверь: ты взял sin или cos? И возвёл ли синус в квадрат?"},
+AVERAGE:{f:"v_ср = (s₁+s₂)/(t₁+t₂);  равные пути: v_ср = 2v₁v₂/(v₁+v₂)",t:"Средняя скорость — это весь путь, делённый на всё время. Среднее арифметическое скоростей работает только тогда, когда времена на участках равны. Всегда проверяй, что равно: пути или времена."},
+GRAPH:{f:"v(t): наклон = a = Δv/Δt, площадь = путь;  x(t): наклон = v",t:"На графике v(t) путь — это площадь под графиком, а ускорение — наклон прямой. Если график состоит из участков, считай площадь каждого и складывай."},
+VECTOR:{f:"навстречу: v = v₁+v₂;  вдогонку: v = |v₁−v₂|;  перпендикулярно: v = √(v₁²+v₂²)",t:"Скорости — векторы. Навстречу и вдогонку они складываются или вычитаются по направлению. Перпендикулярные скорости складываются по теореме Пифагора, а не арифметически."},
+INITIAL_FINAL:{f:"v₀ — начальная, v — конечная, v_ср = (v₀+v)/2 при равноускоренном движении",t:"Различай начальную скорость v₀, конечную скорость v, среднюю скорость v_ср и координату x₀. При разгоне из покоя v₀ = 0, а конечная скорость — это то, что тело набрало к концу разгона."},
+UNKNOWN:{f:"s = v·t;  v = v₀ + at;  s = v₀t + at²/2",t:"Проверь единицы измерения (все ли в СИ) и формулу, связывающую данные и искомую величину."}
+};
+
+const ERR_NAMES = {UNITS:"единицы измерения (СИ)",FORMULA:"формула / расчёт",SIGN:"знак ускорения",SIN_COS:"sin и cos при броске под углом",AVERAGE:"средняя скорость",GRAPH:"чтение графика",VECTOR:"векторное сложение скоростей",INITIAL_FINAL:"путаница v₀, v и s",UNKNOWN:"не распознано"};
+
+// ============ ХРАНИЛИЩЕ ============
+const store = {
+  read(){try{return JSON.parse(localStorage.getItem("fiziktest")||"{}")}catch(e){return{}}},
+  write(d){try{localStorage.setItem("fiziktest",JSON.stringify(d))}catch(e){}}
+};
+
+let state = Object.assign({attempts:[],errors:{},topic:"Все темы"},store.read());
+if(!Array.isArray(state.attempts)) state.attempts=[];
+if(!state.errors||typeof state.errors!=="object") state.errors={};
+if(typeof state.topic!=="string") state.topic="Все темы";
+const save = () => store.write(state);
+
+// ============ ДВИЖОК ============
+function normalize(raw){
+  if(raw===null||raw===undefined)return null;
+  const s = String(raw).trim().replace(/[−–—]/g,"-").replace(/,/g,".").replace(/\s+/g,"");
+  const m = s.match(/^[+-]?\d*\.?\d+/);
+  if(!m) return null;
+  const n = parseFloat(m[0]);
+  return isNaN(n)?null:n;
+}
+function closeTo(a,b){return Math.abs(a-b)<=Math.max(0.011,Math.abs(b)*1e-4);}
+
+function check(task,raw){
+  const ans = normalize(raw);
+  const res = {status:"unknown",et:null,comment:"",repeat:false};
+  if(ans===null){res.comment="Не удалось распознать ответ. Проверь, что введено число, и не забудь про единицы.";return res;}
+  if(closeTo(ans,task.correct)){res.status="correct";return res;}
+  for(const key in task.traps){
+    if(closeTo(ans,parseFloat(key))){
+      const trap=task.traps[key];
+      res.status="trap";res.et=trap.et;res.comment=trap.c;
+      const prevInSession = state.attempts.filter(x => x.sid===sessionId && x.et===trap.et).length;
+      state.errors[trap.et] = (state.errors[trap.et]||0) + 1;
+      res.repeat = (prevInSession + 1) >= 2;
+      return res;
+    }
+  }
+  res.comment="Ответ не совпал ни с правильным, ни с типичной ошибкой. Проверь единицы измерения (СИ) и формулу, связывающую величины.";
+  return res;
+}
+
+// ============ UI ============
+let queue=[],idx=0,solved=0,mistakes=0,answered=false,lastET=null,selected=null;
+let sessionId = Date.now();
+let TOPICS = ["Все темы",...[...new Set(TASKS.map(t=>t.topic))].sort()];
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+// Полная синхронизация ползунка, меток и позиции
+function syncSlider(){
+  const range=$("topicRange");
+  const pos = Math.max(0, TOPICS.indexOf(state.topic));
+  range.min=0;
+  range.max=Math.max(0, TOPICS.length-1);
+  range.value=pos;
+  $("sliderPrev").textContent = pos>0 ? "‹" : "";
+  $("sliderNext").textContent = pos<TOPICS.length-1 ? "›" : "";
+}
+
+function buildTopics(){
+  // 1) чипы
+  const bar=$("topics");
+  bar.innerHTML="";
+  TOPICS.forEach(tp=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="chip"+(tp===state.topic?" active":"");
+    b.textContent=tp;
+    b.onclick=()=>{
+      if(tp===state.topic) return;
+      if((solved+mistakes>0) && !confirm("Начать тему «"+tp+"» заново? Прогресс текущей сессии будет сброшен.")) return;
+      setTopic(tp);
+    };
+    bar.appendChild(b);
+  });
+
+  // 2) ползунок
+  syncSlider();
+
+  const range=$("topicRange");
+  range.oninput=()=>{
+    const pos=parseInt(range.value,10);
+    $("sliderPrev").textContent = pos>0 ? "‹" : "";
+    $("sliderNext").textContent = pos<TOPICS.length-1 ? "›" : "";
+  };
+  range.onchange=()=>{
+    const tp=TOPICS[parseInt(range.value,10)] || "Все темы";
+    if(tp===state.topic){ syncSlider(); return; } // FIX 2: не трогаем текущую задачу
+    if((solved+mistakes>0) && !confirm("Начать тему «"+tp+"» заново? Прогресс текущей сессии будет сброшен.")){
+      syncSlider();
+      return;
+    }
+    setTopic(tp);
+  };
+}
+
+function setTopic(tp){
+  if(!TOPICS.includes(tp)) tp="Все темы";
+  state.topic=tp;
+  save();
+  queue=TASKS.filter(t=>tp==="Все темы"||t.topic===tp);
+  idx=0;solved=0;mistakes=0;answered=false;lastET=null;selected=null;
+  sessionId = Date.now();
+  $("btnTheory").disabled=true;$("btnNext").disabled=true;
+  buildTopics();   // обновит чипы, ползунок, метки
+  showTask();
+}
+
+function showTask(){
+  $("btnNext").textContent="Следующая →";
+  $("options").innerHTML="";
+  $("feedback").className="";
+  $("feedback").innerHTML="";
+  selected=null;answered=false;lastET=null;
+  $("btnTheory").disabled=true;
+  $("btnNext").disabled=true;
+
+  if(!queue.length){
+    $("counter").textContent="";
+    $("question").textContent="В этой теме пока нет задач.";
+    $("status").textContent="";
+    return;
+  }
+  if(idx>=queue.length){showFinish();return;}
+
+  const t=queue[idx];
+  $("counter").textContent="Тема: "+t.topic+" · Задача "+(idx+1)+" из "+queue.length;
+  $("question").textContent=t.text;
+
+  const box=$("options");
+  t.options.forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="option";
+    btn.textContent=String(opt).replace("-","−")+" "+t.unit;
+    btn.dataset.value=String(opt);
+    btn.setAttribute("aria-label","Вариант ответа: "+opt+" "+t.unit);
+    btn.onclick=()=>{
+      if(answered)return;
+      selected=String(opt);
+      [...box.querySelectorAll(".option")].forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+    };
+    box.appendChild(btn);
+  });
+
+  const checkBtn=document.createElement("button");
+  checkBtn.type="button";
+  checkBtn.id="btnCheck";
+  checkBtn.textContent="Проверить";
+  checkBtn.onclick=doCheck;
+  box.appendChild(checkBtn);
+
+  updateStatus();
+}
+
+function doCheck(){
+  if(answered||!queue.length||idx>=queue.length)return;
+  if(!selected){
+    $("feedback").className="show err";
+    $("feedback").innerHTML="<strong>Сначала выбери вариант ответа.</strong>";
+    return;
+  }
+  const t=queue[idx];
+  const res=check(t,selected);
+
+  state.attempts.push({
+    id:t.id,
+    topic:t.topic,
+    answer:selected,
+    status:res.status,
+    et:res.et,
+    sid:sessionId,
+    time:new Date().toISOString()
+  });
+
+  answered=true;
+  lastET=res.et;
+
+  const box=$("options");
+  [...box.children].forEach(b=>{
+    b.disabled=true;
+    if(b.id==="btnCheck")return;
+    if(closeTo(normalize(b.dataset.value),t.correct)) b.classList.add("correct");
+    else if(b.dataset.value===selected) b.classList.add("trap");
+  });
+
+  $("btnTheory").disabled=!lastET;
+  $("btnNext").disabled=false;
+
+  const fb=$("feedback");
+  if(res.status==="correct"){
+    solved++;
+    fb.className="show ok";
+    fb.innerHTML="<strong>✅ Верно!</strong>Правильный ответ: "+t.correct+" "+t.unit+".";
+  } else {
+    mistakes++;
+    fb.className="show err";
+    let html="<strong>❌ Неверно.</strong>";
+    if(res.status==="trap"){
+      html+="<div style='font-size:13px;color:#666;margin-bottom:6px'>Тип ошибки: "+(ERR_NAMES[res.et]||res.et)+"</div>";
+    }
+    html+="<div>"+esc(res.comment)+"</div>";
+    if(res.repeat){
+      const th=THEORY[res.et];
+      if(th){
+        html+="<div class='theory-box'><div style='font-weight:600;margin-bottom:6px'>📘 Повторная ошибка того же типа. Мини-теория:</div><code>"+esc(th.f)+"</code><div>"+esc(th.t)+"</div></div>";
+      }
+    }
+    fb.innerHTML=html;
+  }
+  save();
+  updateStatus();
+}
+
+function nextTask(){
+  if(idx+1<queue.length){idx++;showTask();}
+  else{showFinish();}
+}
+
+function showFinish(){
+  $("counter").textContent="Итог · задач: "+queue.length;
+  $("question").textContent="🎉 Все задачи выбранной темы пройдены!";
+  $("options").innerHTML="";
+  const acc=queue.length?Math.round(solved/queue.length*100):0;
+  let html="<strong>✅ Верно: "+solved+"</strong><br><span style='color:#b3261e'>❌ Ошибок: "+mistakes+"</span><br>Точность: "+acc+"%";
+  const ids=queue.map(t=>t.id);
+  const topicErrors={};
+  state.attempts.filter(a=>a.sid===sessionId && ids.includes(a.id) && a.et).forEach(a=>{
+    topicErrors[a.et]=(topicErrors[a.et]||0)+1;
+  });
+  const entries=Object.entries(topicErrors).sort((a,b)=>b[1]-a[1]);
+  if(entries.length){
+    html+="<div style='margin-top:12px;text-align:left'><div style='font-weight:600;margin-bottom:6px'>Твои ошибки в этой теме:</div>";
+    entries.forEach(([et,n])=>{html+="<div style='font-size:13px;color:#1a4fa0'>• "+(ERR_NAMES[et]||et)+" — "+n+" раз(а)</div>";});
+    html+="</div>";
+  }
+  $("feedback").className="show ok";
+  $("feedback").innerHTML=html;
+  $("btnTheory").disabled=true;
+  $("btnNext").disabled=true;
+  $("btnNext").textContent="Готово";
+}
+
+function updateStatus(){
+  $("status").textContent="Верно: "+solved+" · Ошибок: "+mistakes+" · Задача "+Math.min(idx+1,queue.length)+" из "+queue.length;
+}
+
+// ============ МОДАЛЬНЫЕ ОКНА ============
+function openModal(html){
+  $("modalContent").innerHTML=html;
+  $("modal").classList.add("show");
+}
+function closeModal(){$("modal").classList.remove("show");}
+
+function showTheory(){
+  if(!lastET)return;
+  const th=THEORY[lastET]||THEORY.UNKNOWN;
+  openModal("<h2>📘 Теория по ошибке</h2>"+
+    "<div style='font-size:13px;color:#666;margin-bottom:10px'>Тип: "+(ERR_NAMES[lastET]||lastET)+"</div>"+
+    "<div style='font-weight:600;margin-bottom:4px'>Формулы:</div>"+
+    "<pre>"+esc(th.f)+"</pre>"+
+    "<div style='font-weight:600;margin:12px 0 4px'>Что важно помнить:</div>"+
+    "<div style='font-size:14px;line-height:1.5'>"+esc(th.t)+"</div>"+
+    "<button class='btn-close' onclick='closeModal()'>Понятно</button>");
+}
+
+function showStats(){
+  const a=state.attempts;
+  const total=a.length;
+  const ok=a.filter(x=>x.status==="correct").length;
+  const acc=total?Math.round(ok/total*100):0;
+  let html="<h2>📊 Статистика</h2>"+
+    "<div class='stat-row'><span>Всего попыток</span><span>"+total+"</span></div>"+
+    "<div class='stat-row'><span>Верно</span><span>"+ok+"</span></div>"+
+    "<div class='stat-row'><span>Неверно</span><span>"+(total-ok)+"</span></div>"+
+    "<div class='stat-row'><span>Точность</span><span>"+acc+"%</span></div>";
+  const errs=Object.entries(state.errors).sort((a,b)=>b[1]-a[1]);
+  if(errs.length){
+    html+="<div class='section-title'>Частые ошибки</div>";
+    errs.forEach(([et,n])=>{html+="<div class='stat-row'><span>"+(ERR_NAMES[et]||et)+"</span><span>"+n+"</span></div>";});
+  }
+  const topics={};
+  a.forEach(x=>{topics[x.topic]=topics[x.topic]||{n:0,ok:0};topics[x.topic].n++;if(x.status==="correct")topics[x.topic].ok++;});
+  const tEntries=Object.entries(topics);
+  if(tEntries.length){
+    html+="<div class='section-title'>По темам</div>";
+    tEntries.forEach(([tp,d])=>{html+="<div class='stat-row'><span>"+tp+"</span><span>"+d.ok+"/"+d.n+"</span></div>";});
+  }
+  html+="<button class='btn-close' onclick='closeModal()'>Закрыть</button>";
+  openModal(html);
+}
+
+function showSupport(){
+  openModal(
+    "<h2>💬 Поддержать проект</h2>"+
+    "<div style='font-size:15px;line-height:1.55;margin-bottom:16px'>"+
+      "Если тренажёр оказался полезным — напиши автору в Telegram. "+
+      "Буду рад отзывам, замечаниям и идеям по улучшению."+
+    "</div>"+
+    "<div style='background:rgba(26,79,160,.08);border-radius:10px;padding:16px;text-align:center;"+
+         "font-size:22px;font-weight:700;color:var(--primary);letter-spacing:.5px;margin-bottom:16px'>"+
+      "@xertttte"+
+    "</div>"+
+    "<a href='https://t.me/xertttte' target='_blank' rel='noopener' "+
+       "style='display:block;text-align:center;padding:16px;background:var(--primary);color:#fff;"+
+              "border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;margin-bottom:10px'>"+
+      "Открыть в Telegram"+
+    "</a>"+
+    "<button class='btn-close' onclick='closeModal()'>Закрыть</button>"
+  );
+}
+
+function resetAll(){
+  if(!confirm("Сбросить всю статистику и начать заново?"))return;
+  state.attempts=[];
+  state.errors={};
+  save();
+  setTopic(state.topic);
+}
+
+// ============ МЕНЮ ============
+function toggleMenu(e){
+  if(e) e.stopPropagation();
+  const m=$("menu"), b=$("menuBtn");
+  const willOpen = !m.classList.contains("show");
+  m.classList.toggle("show", willOpen);
+  b.setAttribute("aria-expanded", willOpen ? "true" : "false");
+}
+function closeMenu(){
+  $("menu").classList.remove("show");
+  $("menuBtn").setAttribute("aria-expanded","false");
+}
+function menuAction(fn){
+  closeMenu();
+  setTimeout(fn, 60);
+}
+document.addEventListener("click", (e)=>{
+  const m=$("menu");
+  if(!m.classList.contains("show")) return;
+  if(!e.target.closest("#menu") && !e.target.closest("#menuBtn")) closeMenu();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape"){ closeMenu(); closeModal(); }
+});
+
+// ============ ЦВЕТОВЫЕ ТЕМЫ ============
+const THEMES = ["light","dark","pink","blue"];
+const THEME_KEY = "fiziktest_theme";
+
+function applyTheme(name){
+  if(!THEMES.includes(name)) name="light";
+  document.documentElement.setAttribute("data-theme", name);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content",
+    name==="dark" ? "#12151c" :
+    name==="pink" ? "#d63384" :
+    name==="blue" ? "#0b6bcb" : "#1a4fa0");
+  document.querySelectorAll(".theme-dot").forEach(d=>{
+    d.classList.toggle("active", d.dataset.theme===name);
+  });
+  try{ localStorage.setItem(THEME_KEY, name); }catch(e){}
+}
+
+function initTheme(){
+  let saved="light";
+  try{ saved = localStorage.getItem(THEME_KEY) || "light"; }catch(e){}
+  applyTheme(saved);
+  document.querySelectorAll(".theme-dot").forEach(d=>{
+    d.addEventListener("click", ()=>applyTheme(d.dataset.theme));
+  });
+}
+
+// ============ СТАРТ ============
+initTheme();
+setTopic(state.topic);   // setTopic сам вызывает buildTopics
+</script>
+</body>
+</html>
