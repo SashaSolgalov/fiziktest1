@@ -22,13 +22,11 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 .timer-clock.warn {color:#d97706;}
 .timer-clock.danger {color:var(--err); animation: pulse 1s infinite;}
 @keyframes pulse {0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;}}
-
 .topic-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;}
 .topic-bar::-webkit-scrollbar {height: 8px;}
 .topic-bar::-webkit-scrollbar-track {background: var(--bg); border-radius: 4px;}
 .topic-bar::-webkit-scrollbar-thumb {background: var(--border); border-radius: 4px;}
 .topic-bar::-webkit-scrollbar-thumb:hover {background: var(--hint);}
-
 .chip{flex:0 0 auto;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:22px;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;color:var(--text)}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .counter{font-size:13px;color:var(--hint);margin-bottom:8px}
@@ -68,6 +66,14 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 .level-switch {display:flex; background:var(--border); border-radius:12px; padding:4px; margin-bottom:12px; font-weight:600;}
 .level-switch button {flex:1; border:none; background:none; padding:12px; border-radius:8px; font-size:15px; cursor:pointer; color:var(--hint); font-family:inherit;}
 .level-switch button.active {background:var(--card); color:var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+
+/* Стили для Грамоты */
+#certificate { display: none; background: #fff; color: #222; border: 10px double #1a4fa0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px auto; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: 'Times New Roman', serif; }
+#certificate h2 { color: #1a4fa0; font-size: 24px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 2px; }
+#certificate .cert-name { font-size: 28px; font-weight: bold; margin: 15px 0; border-bottom: 2px solid #1a4fa0; display: inline-block; padding-bottom: 5px; }
+#certificate .cert-text { font-size: 16px; margin: 10px 0; line-height: 1.5; }
+#certificate .cert-score { font-size: 36px; color: #1a7f37; font-weight: bold; margin: 10px 0; }
+#certificate .cert-footer { font-size: 12px; color: #666; margin-top: 20px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -118,6 +124,7 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 <script>
 "use strict";
 
+// ... (БАЗА ЗАДАЧ TASKS и THEORY остаются без изменений) ...
 const TASKS = [
 {id:1,lvl:"school",topic:"Равномерное движение",text:"Автомобиль едет со скоростью 72 км/ч. Какой путь он проедет за 30 минут?",unit:"км",correct:36,options:["36","2160","2.4","72"],
  traps:{"2160":{et:"UNITS",c:"Ты не перевёл минуты в часы. 30 мин = 0,5 ч, поэтому s = v·t = 72 · 0,5 = 36 км."},"2.4":{et:"FORMULA",c:"Похоже, ты разделил скорость на время. При равномерном движении путь находится умножением: s = v·t."},"72":{et:"INITIAL_FINAL",c:"72 км/ч — это скорость, а не путь. Путь нужно ещё умножить на время: s = 72 · 0,5."}}},
@@ -232,7 +239,7 @@ const TASKS = [
  traps:{"40":{et:"FORMULA",c:"Время подъема = 2 с. H = gt²/2 = 10·4/2 = 20 м."},"10":{et:"FORMULA",c:"H = 20 м."},"80":{et:"FORMULA",c:"H = 20 м."}}}
 ];
 
-const THEORY = {
+const THEORY = { /* ТЕОРИЯ ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ, ОНА ЕСТЬ В ВАШЕМ ФАЙЛЕ */ 
 UNITS:{f:"1 км/ч = 1/3,6 м/с;  1 мин = 60 с;  1 км = 1000 м",t:"Все величины подставляются в формулу в единицах СИ: путь — в метрах, время — в секундах, скорость — в м/с."},
 FORMULA:{f:"s = v·t;  v = s/t;  v = v₀ + at;  s = v₀t + at²/2;  s = (v² − v₀²)/(2a)",t:"Прежде чем считать, выпиши, какая величина дана и какая иском. Подбирай формулу, в которой ровно эти величины."},
 SIGN:{f:"торможение: a < 0,  s = v₀t − |a|t²/2",t:"Если тело тормозит, ускорение направлено против скорости, поэтому подставляется со знаком минус."},
@@ -251,7 +258,7 @@ const store = {
   write(d){try{localStorage.setItem("fiziktest",JSON.stringify(d))}catch(e){}}
 };
 
-let state = Object.assign({attempts:[],errors:{},topic:"Все темы",level:"school",theme:"light"},store.read());
+let state = Object.assign({attempts:[],errors:{},topic:"Все темы",level:"school",theme:"light", studentName:""},store.read());
 if(!Array.isArray(state.attempts)) state.attempts=[];
 if(!state.errors||typeof state.errors!=="object") state.errors={};
 if(!state.level) state.level="school";
@@ -396,7 +403,6 @@ function setTopic(tp){
   let baseQueue = filteredTasks.filter(t=>tp==="Все темы"||t.topic===tp);
   queue = shuffleArray([...baseQueue]); 
   
-  // Перемешиваем варианты ответов для каждой задачи
   queue.forEach(t => {
     t.options = shuffleArray([...t.options]);
   });
@@ -516,13 +522,57 @@ function nextTask(){
 
 function showFinish(){
   clearInterval(timerInterval);
+  
+  // 1. Показываем грамоту
+  const acc = queue.length ? Math.round(solved/queue.length*100) : 0;
+  const levelName = state.level === 'school' ? 'Школьная программа' : 'Подготовка к ЕГЭ';
+  
+  const certHTML = `
+    <div id="certificate" style="display:block; margin:0 auto; background:#fff; color:#222;">
+      <h2>Грамота</h2>
+      <div class="cert-text">Настоящим подтверждается, что</div>
+      <div class="cert-name">${esc(state.studentName || "Ученик")}</div>
+      <div class="cert-text">успешно прошел(ла) тестирование по физике<br><b>«${levelName}»</b></div>
+      <div class="cert-score">${solved} / ${queue.length}</div>
+      <div class="cert-text">Правильных ответов.<br>Точность: <b>${acc}%</b></div>
+      <div class="cert-footer">Тренажёр FizikTest · ${new Date().toLocaleDateString('ru-RU')}</div>
+    </div>
+  `;
+
+  openModal(`
+    <h2>🎉 Тест завершен!</h2>
+    ${certHTML}
+    <button class="btn-close" onclick="closeModal(); startNewSession();">Пройти еще раз</button>
+  `);
+
+  // 2. Отправляем результат в Telegram (если настроено)
+  sendResultToTelegram(solved, queue.length);
+
   $("counter").textContent="Итог · задач: "+queue.length;
-  $("question").textContent="🎉 Все задачи выбранной темы пройдены!";
+  $("question").textContent="Вы прошли тест! Ваша грамота выше.";
   $("options").innerHTML="";
-  const acc=queue.length?Math.round(solved/queue.length*100):0;
-  let html="<strong>✅ Верно: "+solved+"</strong><br><span style='color:var(--err)'>❌ Ошибок: "+mistakes+"</span><br>Точность: "+acc+"%";
-  $("feedback").className="show ok"; $("feedback").innerHTML=html;
+  $("feedback").className=""; $("feedback").innerHTML="";
   $("btnTheory").disabled=true; $("btnNext").disabled=true; $("btnNext").textContent="Готово";
+}
+
+function sendResultToTelegram(score, total) {
+  // ВСТАВЬТЕ СЮДА ВАШУ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+  const url = 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT'; 
+  if (url === 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT') return; // Если ссылка не вставлена — ничего не делаем
+
+  const data = {
+    name: state.studentName || "Ученик",
+    level: state.level,
+    score: score,
+    total: total
+  };
+
+  fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(err => console.log('Ошибка отправки:', err));
 }
 
 function updateStatus(){
@@ -558,7 +608,7 @@ function showSupport(){
 
 function resetAll(){
   if(!confirm("Сбросить всю статистику и начать заново?"))return;
-  state.attempts=[]; state.errors={}; save();
+  state.attempts=[]; state.errors={}; state.studentName=""; save();
   setLevel(state.level);
 }
 
@@ -576,8 +626,27 @@ document.addEventListener("click", (e)=>{
   if(!e.target.closest("#menu") && !e.target.closest("#menuBtn")) closeMenu();
 });
 
-applyTheme();
-setLevel(state.level);
+// Функция запроса имени при старте
+function askNameAndStart() {
+  // Если имя уже есть, но пользователь нажал "Заново", все равно спросим
+  let name = prompt("Введите ваше имя и фамилию для грамоты:", state.studentName || "");
+  if (name) {
+    state.studentName = name.trim();
+    save();
+  } else if (!state.studentName) {
+    state.studentName = "Ученик"; // Если отменили, ставим по умолчанию
+  }
+  
+  // Запускаем сессию
+  applyTheme();
+  buildTopics();
+  setTopic("Все темы");
+}
+
+// Вызываем запрос имени при загрузке страницы
+window.onload = () => {
+  askNameAndStart();
+};
 </script>
 </body>
 </html>
