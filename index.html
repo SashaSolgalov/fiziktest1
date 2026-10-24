@@ -65,80 +65,6 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 .menu.show{display:block;}
 .menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:none;border-radius:8px;font-size:15px;font-family:inherit;text-align:left;cursor:pointer;color:var(--text);min-height:48px}
 .menu-danger{color:var(--err)}
-.level-switch {display:flex;
-Сделать чтобы они были рандомные 
-Понял вас! Чтобы ответы были абсолютно случайными (без всякой «карусели» 1-2-3-4, которая иногда выдавала предсказуемые комбинации), я переписал логику перемешивания.
-
-Теперь при каждом старте темы правильный ответ будет вставать на любую случайную позицию (1, 2, 3 или 4), а неправильные варианты тоже будут перемешаны между собой. Это чистая случайность.
-
-Вот полный рабочий код. Просто полностью замените ваш файл index.html в GitHub на этот:
-
-html
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1a4fa0">
-<title>FizikTest</title>
-<style>
-:root{--bg:#f5f6fa;--card:#fff;--primary:#1a4fa0;--ok:#1a7f37;--err:#b3261e;--hint:#666;--border:#d9dce3;--radius:14px;--text:#222;--option-bg:#fafbfc}
-[data-theme="dark"] {--bg:#121212;--card:#1e1e1e;--primary:#66b2ff;--ok:#4caf50;--err:#cf6679;--hint:#aaa;--border:#333;--text:#e0e0e0;--option-bg:#2c2c2c}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:var(--bg);font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);transition:background 0.3s, color 0.3s;}
-body{min-height:100vh;padding:12px 12px 140px;font-size:16px;line-height:1.4}
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-h1{font-size:20px;margin:0;color:var(--primary);line-height:1.2}
-h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margin-top:3px}
-.icon-btn{background:none;border:none;padding:10px;font-size:22px;cursor:pointer;border-radius:8px;color:var(--text)}
-.card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.timer-wrap {display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:12px 16px; border-radius:var(--radius); margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); font-weight:600;}
-.timer-label {font-size:14px; color:var(--hint);}
-.timer-clock {font-size:20px; color:var(--primary); font-variant-numeric: tabular-nums;}
-.timer-clock.warn {color:#d97706;}
-.timer-clock.danger {color:var(--err); animation: pulse 1s infinite;}
-@keyframes pulse {0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;}}
-.topic-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;}
-.topic-bar::-webkit-scrollbar {height: 8px;}
-.topic-bar::-webkit-scrollbar-track {background: var(--bg); border-radius: 4px;}
-.topic-bar::-webkit-scrollbar-thumb {background: var(--border); border-radius: 4px;}
-.topic-bar::-webkit-scrollbar-thumb:hover {background: var(--hint);}
-.chip{flex:0 0 auto;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:22px;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit;color:var(--text)}
-.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.counter{font-size:13px;color:var(--hint);margin-bottom:8px}
-.question{font-size:17px;line-height:1.45;margin-bottom:14px;font-weight:500}
-.option{display:flex;align-items:center;width:100%;text-align:left;padding:16px;margin-bottom:10px;background:var(--option-bg);border:2px solid var(--border);border-radius:12px;font-size:16px;cursor:pointer;font-family:inherit;color:var(--text);min-height:56px;transition:all .15s}
-.option.selected{border-color:var(--primary);background:var(--bg)}
-.option.correct{border-color:var(--ok);background:rgba(26,127,55,0.1)}
-.option.trap{border-color:var(--err);background:rgba(179,38,30,0.1)}
-.option:disabled{cursor:default}
-.option:disabled:not(.correct):not(.trap){opacity:.55}
-#btnCheck{width:100%;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;margin-top:6px;font-family:inherit;cursor:pointer;background:var(--primary);color:#fff;min-height:56px}
-#feedback{display:none;padding:14px;border-radius:12px;font-size:15px;line-height:1.5;margin-top:6px}
-#feedback.show{display:block}
-#feedback.ok{background:rgba(26,127,55,0.1);color:var(--ok)}
-#feedback.err{background:rgba(179,38,30,0.1);color:var(--err)}
-#feedback strong{display:block;margin-bottom:8px;font-size:16px}
-.theory-box{margin-top:12px;padding:12px;background:var(--bg);border-radius:10px;color:var(--primary);font-size:14px;line-height:1.5}
-.theory-box code{display:block;background:var(--card);padding:8px 10px;border-radius:6px;margin:8px 0;font-size:13px;white-space:pre-wrap}
-.fab-bar{position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 55%,transparent);display:flex;gap:10px;z-index:10}
-.fab-bar button{flex:1;padding:16px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;min-height:56px}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-secondary{background:var(--card);color:var(--primary);border:2px solid var(--primary)!important}
-.fab-bar button:disabled{opacity:.4;cursor:default}
-.status{position:fixed;left:0;right:0;bottom:90px;text-align:center;font-size:12px;color:var(--hint);pointer-events:none}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
-.modal-bg.show{display:flex}
-.modal{background:var(--card);border-radius:16px;padding:20px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;color:var(--text)}
-.modal h2{margin:0 0 14px;font-size:19px;color:var(--primary)}
-.modal pre{background:var(--bg);padding:10px 12px;border-radius:8px;white-space:pre-wrap;font-size:13px;color:var(--primary);margin:8px 0}
-.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:15px;gap:12px}
-.stat-row span:last-child{font-weight:600;color:var(--primary);white-space:nowrap}
-.btn-close{width:100%;padding:14px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:16px;font-weight:600;margin-top:16px;cursor:pointer;font-family:inherit}
-.menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--card);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:200px;padding:6px;z-index:50;display:none}
-.menu.show{display:block;}
-.menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:none;border-radius:8px;font-size:15px;font-family:inherit;text-align:left;cursor:pointer;color:var(--text);min-height:48px}
-.menu-danger{color:var(--err)}
 .level-switch {display:flex; background:var(--border); border-radius:12px; padding:4px; margin-bottom:12px; font-weight:600;}
 .level-switch button {flex:1; border:none; background:none; padding:12px; border-radius:8px; font-size:15px; cursor:pointer; color:var(--hint); font-family:inherit;}
 .level-switch button.active {background:var(--card); color:var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
@@ -437,6 +363,7 @@ function setLevel(lvl){
   save();
   $("btnSchool").className = lvl==="school" ? "active" : "";
   $("btnEGE").className = lvl==="ege" ? "active" : "";
+  buildTopics();
   setTopic("Все темы");
 }
 
@@ -485,7 +412,6 @@ function setTopic(tp){
     updateTimerDisplay();
   }
   showTask();
-  buildTopics();
 }
 
 function startNewSession() { setTopic(state.topic); }
