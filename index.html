@@ -217,7 +217,7 @@ const save = () => store.write(state);
 let timeLeft = 0;
 let timerInterval = null;
 let timerPaused = false;
-const TIME_LIMIT = 15 * 60
+const TIME_LIMIT = 15 * 60; // 15 минут
 
 function shuffleArray(array) {
   let currentIndex = array.length, randomIndex;
@@ -511,6 +511,11 @@ function showFinish(){
   $("feedback").className=""; $("feedback").innerHTML="";
   $("btnTheory").disabled=true; $("btnNext").disabled=true; $("btnNext").textContent="Готово";
 }
+
+function sendResultToTelegram(score, total) {
+  // ВСТАВЬТЕ СЮДА ВАШУ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+  const url = 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT'; 
+  if (url === 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT') return;
 
   const data = {
     name: state.studentName || "Ученик",
