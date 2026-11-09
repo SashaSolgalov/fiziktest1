@@ -417,6 +417,7 @@ function doCheck(){
 
   $("btnTheory").disabled=!lastET; $("btnNext").disabled=false;
   const fb=$("feedback");
+  
   if(res.status==="correct"){
     solved++;
     fb.className="show ok";
@@ -424,23 +425,30 @@ function doCheck(){
   } else {
     mistakes++;
     fb.className="show err";
+    
+    // 1. Сначала выводим объяснение ошибки
     let html="<strong>❌ Неверно.</strong>";
-    if(res.status==="trap") html+="<div style='font-size:13px;color:var(--hint);margin-bottom:6px'>Тип ошибки: "+(ERR_NAMES[res.et]||res.et)+"</div>";
+    if(res.status==="trap") {
+      html+="<div style='font-size:13px;color:var(--hint);margin-bottom:6px'>Тип ошибки: "+(ERR_NAMES[res.et]||res.et)+"</div>";
+    }
     html+="<div>"+esc(res.comment)+"</div>";
     
-    // Выводим пошаговое решение, если оно есть
+    // 2. Затем выводим пошаговое решение с формулами и числами
     if (res.sol) {
       const formattedSol = res.sol
         .replace(/<b>Формула:<\/b>/g, '<div class="formula">Формула:</div>')
+        .replace(/<b>Перевод:<\/b>/g, '<div class="formula">Перевод:</div>')
         .replace(/<b>Подстановка:<\/b>/g, '<div class="subst">Подстановка:</div>')
         .replace(/<b>Ответ:<\/b>/g, '<div class="result">Ответ:</div>')
-        .replace(/<b>Перевод:<\/b>/g, '<div class="formula">Перевод:</div>')
         .replace(/<b>Скорость:<\/b>/g, '<div class="formula">Скорость:</div>')
         .replace(/<b>Коэффициент при t²:<\/b>/g, '<div class="formula">Коэффициент при t²:</div>')
         .replace(/<b>Сравниваем с формулой:<\/b>/g, '<div class="formula">Сравниваем с формулой:</div>')
+        .replace(/<b>Сравнение с S = v₀t + at²\/2:<\/b>/g, '<div class="formula">Сравнение с S = v₀t + at²/2:</div>')
         .replace(/<b>Конечная скорость при ударе:<\/b>/g, '<div class="formula">Конечная скорость при ударе:</div>')
         .replace(/<b>Отсюда:<\/b>/g, '<div class="result">Отсюда:</div>')
+        .replace(/<b>Ускорение:<\/b>/g, '<div class="formula">Ускорение:</div>')
         .replace(/\n/g, '<br>');
+      
       html += `<div class="solution-box">${formattedSol}</div>`;
     }
     
