@@ -69,6 +69,9 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 .menu.show{display:block;}
 .menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;background:none;border-radius:8px;font-size:15px;font-family:inherit;text-align:left;cursor:pointer;color:var(--text);min-height:48px}
 .menu-danger{color:var(--err)}
+.level-switch {display:flex; background:var(--border); border-radius:12px; padding:4px; margin-bottom:12px; font-weight:600;}
+.level-switch button {flex:1; border:none; background:none; padding:12px; border-radius:8px; font-size:15px; cursor:pointer; color:var(--hint); font-family:inherit;}
+.level-switch button.active {background:var(--card); color:var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
 
 #certificate { display: none; background: #fff; color: #222; border: 10px double #1a4fa0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px auto; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: 'Times New Roman', serif; }
 #certificate h2 { color: #1a4fa0; font-size: 24px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 2px; }
@@ -92,6 +95,11 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
     </div>
   </div>
 </header>
+
+<div class="level-switch">
+  <button type="button" id="btnSchool" onclick="setLevel('school')">🏫 Школа</button>
+  <button type="button" id="btnEGE" onclick="setLevel('ege')">🎓 ЕГЭ (Бабаев)</button>
+</div>
 
 <div class="timer-wrap">
   <div class="timer-label">⏱ Осталось времени:</div>
@@ -121,9 +129,9 @@ h1 small{font-weight:normal;font-size:12px;color:var(--hint);display:block;margi
 <script>
 "use strict";
 
-// ==================== БАЗА ЗАДАЧ (15 уникальных) ====================
+// ==================== БАЗА ЗАДАЧ ====================
 const TASKS = [
-// --- ТЕМА 1: Равномерное движение (5) ---
+// ==================== ШКОЛА (3 темы по 5) ====================
 {id:1,lvl:"school",topic:"Равномерное движение",text:"Автомобиль движется со скоростью 90 км/ч. Какой путь он проедет за 20 минут? (Сборник Лукашика)",unit:"км",correct:30,options:["30","1800","1.5","90"],
  traps:{"1800":{et:"UNITS",c:"Время нужно перевести в часы.",sol:"<b>Перевод:</b> 20 мин = 1/3 ч\n<b>Формула:</b> s = v·t\n<b>Подстановка:</b> s = 90 · (1/3)\n<b>Ответ:</b> s = 30 км"},
         "1.5":{et:"FORMULA",c:"Скорость умножается на время, а не делится.",sol:"<b>Формула:</b> s = v·t\n<b>Подстановка:</b> s = 90 · (1/3)\n<b>Ответ:</b> s = 30 км"},
@@ -145,7 +153,6 @@ const TASKS = [
         "129.6":{et:"UNITS",c:"Нужно делить на 3,6, а не умножать.",sol:"<b>Формула:</b> v = 36 : 3,6\n<b>Ответ:</b> 10 м/с"},
         "3.6":{et:"UNITS",c:"Неверный коэффициент деления.",sol:"<b>Формула:</b> 36 : 3,6 = 10 м/с\n<b>Ответ:</b> 10 м/с"}}},
 
-// --- ТЕМА 2: Равноускоренное движение (5) ---
 {id:6,lvl:"school",topic:"Равноускоренное движение",text:"Зависимость пути от времени: S = 2t + t². Ускорение тела равно: (Контрольная по Мякишеву)",unit:"м/с²",correct:2,options:["2","1","4","3"],
  traps:{"1":{et:"FORMULA",c:"Коэффициент при t² равен a/2.",sol:"<b>Сравнение с S = v₀t + at²/2:</b> 1 = a/2\n<b>Отсюда:</b> a = 2 м/с²"},
         "4":{et:"FORMULA",c:"Коэффициент при t² в 2 раза меньше ускорения.",sol:"<b>Сравнение:</b> a/2 = 1 → a = 2 м/с²"},
@@ -167,7 +174,6 @@ const TASKS = [
         "5":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>s = 10 м</b>"},
         "0":{et:"INITIAL_FINAL",c:"Тело двигалось.",sol:"<b>s = 10 м</b>"}}},
 
-// --- ТЕМА 3: Движение по вертикали (5) ---
 {id:11,lvl:"school",topic:"Движение по вертикали",text:"Тело свободно падает с высоты 20 м. Найдите время падения. (Задачник Рымкевича)",unit:"с",correct:2,options:["2","4","1","20"],
  traps:{"4":{et:"FORMULA",c:"Забыт корень.",sol:"<b>Формула:</b> t = √(2h/g)\n<b>Подстановка:</b> √(40/10) = √4\n<b>Ответ:</b> 2 с"},
         "1":{et:"FORMULA",c:"Неверная формула.",sol:"<b>t = 2 с</b>"},
@@ -187,7 +193,69 @@ const TASKS = [
 {id:15,lvl:"school",topic:"Движение по вертикали",text:"С какой начальной скоростью нужно бросить вниз тело с высоты 45 м, чтобы оно упало за 2 с? (g = 10 м/с²) (Сборник задач)",unit:"м/с",correct:12.5,options:["12.5","10","5","20"],
  traps:{"10":{et:"FORMULA",c:"Неверно подставлено.",sol:"<b>Формула:</b> h = v₀t + gt²/2\n<b>Подстановка:</b> 45 = 2v₀ + 20\n<b>Ответ:</b> v₀ = 12,5 м/с"},
         "5":{et:"INITIAL_FINAL",c:"5 — неверное значение.",sol:"<b>v₀ = 12,5 м/с</b>"},
-        "20":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>v₀ = 12,5 м/с</b>"}}}
+        "20":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>v₀ = 12,5 м/с</b>"}}},
+
+// ==================== ЕГЭ (Бабаев, 3 темы по 5) ====================
+{id:101,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Движение тела по оси OX происходит по закону x = 2 + 3t (м). Определить проекцию скорости тела на ось X. (Бабаев, 1.1.1)",unit:"м/с",correct:3,options:["3","2","5","0"],
+ traps:{"2":{et:"INITIAL_FINAL",c:"2 — это начальная координата, а не скорость.",sol:"<b>Формула:</b> vₓ = коэффициент при t\n<b>Подстановка:</b> vₓ = 3\n<b>Ответ:</b> 3 м/с"},
+        "5":{et:"FORMULA",c:"Нужно взять только коэффициент при t, а не сумму.",sol:"<b>Формула:</b> vₓ = 3 м/с\n<b>Ответ:</b> 3 м/с"},
+        "0":{et:"FORMULA",c:"Тело движется, скорость не равна нулю.",sol:"<b>vₓ = 3 м/с</b>"}}},
+{id:102,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Тело движется в отрицательном направлении оси OX с постоянной скоростью 2 м/с. Начальная координата 5 м. Напишите уравнение движения. (Бабаев, 1.1.2)",unit:"м",correct:"5 − 2t",options:["5 − 2t","5 + 2t","−2 + 5t","2 + 5t"],
+ traps:{"5 + 2t":{et:"SIGN",c:"Движение в отрицательном направлении, значит скорость со знаком минус.",sol:"<b>Формула:</b> x = x₀ + vₓ·t\n<b>Подстановка:</b> x = 5 − 2t\n<b>Ответ:</b> 5 − 2t"},
+        "−2 + 5t":{et:"FORMULA",c:"Перепутаны местами начальная координата и скорость.",sol:"<b>x = 5 − 2t</b>"},
+        "2 + 5t":{et:"FORMULA",c:"Неверное уравнение.",sol:"<b>x = 5 − 2t</b>"}}},
+{id:103,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Половину всего времени движения тело двигалось со скоростью 10 м/с, а оставшееся время — со скоростью 8 м/с. Определить среднюю скорость тела. (Бабаев, 1.2)",unit:"м/с",correct:9,options:["9","8","10","18"],
+ traps:{"8":{et:"AVERAGE",c:"Нужно учитывать оба участка времени.",sol:"<b>Формула:</b> v_ср = (v₁t₁ + v₂t₂) / (t₁ + t₂)\n<b>Подстановка:</b> (10·0,5t + 8·0,5t) / t = (5 + 4) / 1\n<b>Ответ:</b> 9 м/с"},
+        "10":{et:"AVERAGE",c:"Нужно учитывать оба участка времени.",sol:"<b>v_ср = 9 м/с</b>"},
+        "18":{et:"FORMULA",c:"Скорости нельзя просто складывать.",sol:"<b>v_ср = 9 м/с</b>"}}},
+{id:104,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Одну треть всего времени автомобиль движется со скоростью 60 км/ч, вторую треть — со скоростью 30 км/ч, а остальное время стоит. Определить среднюю скорость автомобиля. (Бабаев, 1.2)",unit:"км/ч",correct:30,options:["30","45","90","15"],
+ traps:{"45":{et:"AVERAGE",c:"Нужно учитывать, что автомобиль стоял треть времени.",sol:"<b>Формула:</b> v_ср = (v₁t₁ + v₂t₂ + v₃t₃) / (t₁ + t₂ + t₃)\n<b>Подстановка:</b> (60·1/3 + 30·1/3 + 0·1/3) / 1 = (20 + 10) / 1\n<b>Ответ:</b> 30 км/ч"},
+        "90":{et:"FORMULA",c:"Скорости нельзя складывать.",sol:"<b>v_ср = 30 км/ч</b>"},
+        "15":{et:"AVERAGE",c:"Неверный подсчёт.",sol:"<b>v_ср = 30 км/ч</b>"}}},
+{id:105,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Санки, двигаясь вниз по горе, прошли за первую секунду 2 м, за вторую — 6 м, за третью — 10 м, за четвёртую — 14 м. Найти среднюю скорость за всё время движения. (Бабаев, 1.2)",unit:"м/с",correct:8,options:["8","10","6","4"],
+ traps:{"10":{et:"AVERAGE",c:"Нужно весь путь разделить на всё время.",sol:"<b>Формула:</b> v_ср = (s₁ + s₂ + s₃ + s₄) / t\n<b>Подстановка:</b> (2 + 6 + 10 + 14) / 4 = 32 / 4\n<b>Ответ:</b> 8 м/с"},
+        "6":{et:"AVERAGE",c:"Неверный подсчёт.",sol:"<b>v_ср = 8 м/с</b>"},
+        "4":{et:"AVERAGE",c:"Неверный подсчёт.",sol:"<b>v_ср = 8 м/с</b>"}}},
+{id:106,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"При равноускоренном движении из состояния покоя тело за 3-ю секунду проходит 15 м. С каким ускорением движется тело?",unit:"м/с²",correct:6,options:["6","5","10","7.5"],
+ traps:{"5":{et:"FORMULA",c:"15 м — это путь за 3-ю секунду. s₃ = a(2·3−1)/2 = 5a/2.",sol:"<b>Формула:</b> s_n = a(2n−1)/2\n<b>Подстановка:</b> 15 = a(2·3−1)/2 = 5a/2\n<b>Ответ:</b> a = 6 м/с²"},
+        "10":{et:"FORMULA",c:"Путь за 1-ю секунду равен a/2.",sol:"<b>a = 6 м/с²</b>"},
+        "7.5":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>a = 6 м/с²</b>"}}},
+{id:107,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Автомобиль движется по закруглению радиусом 50 м с постоянной скоростью 20 м/с. Найдите центростремительное ускорение.",unit:"м/с²",correct:8,options:["8","4","0.4","10"],
+ traps:{"4":{et:"FORMULA",c:"a = v²/R = 400/50 = 8 м/с².",sol:"<b>Формула:</b> a = v²/R\n<b>Подстановка:</b> 400/50\n<b>Ответ:</b> 8 м/с²"},
+        "0.4":{et:"FORMULA",c:"Скорость не возведена в квадрат.",sol:"<b>a = 8 м/с²</b>"},
+        "10":{et:"FORMULA",c:"Неверный расчёт.",sol:"<b>a = 8 м/с²</b>"}}},
+{id:108,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Тело брошено под углом к горизонту. В верхней точке траектории его скорость равна 10 м/с, а время полета до верхней точки 2 с. Найдите начальную скорость тела (g = 10).",unit:"м/с",correct:22.4,options:["22.4","20","14.1","10"],
+ traps:{"20":{et:"INITIAL_FINAL",c:"20 — это вертикальная составляющая. Полная скорость: v₀ = √(vₓ² + v_y²).",sol:"<b>Формула:</b> v₀ = √(vₓ² + v_y²)\n<b>Подстановка:</b> v_y = gt = 20; v₀ = √(10² + 20²) = √500\n<b>Ответ:</b> ≈ 22,4 м/с"},
+        "14.1":{et:"FORMULA",c:"Неверный расчёт.",sol:"<b>v₀ ≈ 22,4 м/с</b>"},
+        "10":{et:"INITIAL_FINAL",c:"10 — это только горизонтальная составляющая.",sol:"<b>v₀ ≈ 22,4 м/с</b>"}}},
+{id:109,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Два автомобиля движутся по взаимно перпендикулярным дорогам со скоростями 30 м/с и 40 м/с. Найдите модуль скорости первого автомобиля относительно второго.",unit:"м/с",correct:50,options:["50","70","10","35"],
+ traps:{"70":{et:"VECTOR",c:"Скорости перпендикулярны. v = √(v₁²+v₂²) = 50 м/с.",sol:"<b>Формула:</b> v = √(v₁²+v₂²)\n<b>Подстановка:</b> √(900+1600) = √2500\n<b>Ответ:</b> 50 м/с"},
+        "10":{et:"VECTOR",c:"Вычитание для сонаправленных.",sol:"<b>v = 50 м/с</b>"},
+        "35":{et:"AVERAGE",c:"Среднее арифметическое.",sol:"<b>v = 50 м/с</b>"}}},
+{id:110,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Тело движется по окружности радиусом 20 м с угловой скоростью 2 рад/с. Найдите линейную скорость.",unit:"м/с",correct:40,options:["40","10","80","20"],
+ traps:{"10":{et:"FORMULA",c:"Ты разделил радиус на ω. v = ωR = 2·20 = 40 м/с.",sol:"<b>Формула:</b> v = ωR\n<b>Подстановка:</b> 2 · 20\n<b>Ответ:</b> 40 м/с"},
+        "80":{et:"FORMULA",c:"Умножено лишний раз на 2.",sol:"<b>v = 40 м/с</b>"},
+        "20":{et:"INITIAL_FINAL",c:"20 — это радиус.",sol:"<b>v = 40 м/с</b>"}}},
+{id:111,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Скорость тела, движущегося прямолинейно, меняется по закону v = 2 + 4t. Какой путь пройдёт тело за первые 3 секунды?",unit:"м",correct:24,options:["24","12","30","18"],
+ traps:{"12":{et:"INITIAL_FINAL",c:"Неверная формула.",sol:"<b>Формула:</b> s = v₀t + at²/2\n<b>Подстановка:</b> a = 4; s = 2·3 + 4·9/2 = 6 + 18\n<b>Ответ:</b> 24 м"},
+        "30":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>s = 24 м</b>"},
+        "18":{et:"FORMULA",c:"18 — это только at²/2.",sol:"<b>s = 24 м</b>"}}},
+{id:112,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Тело брошено с высоты 20 м горизонтально со скоростью 15 м/с. Найти модуль скорости тела в момент падения на землю (g = 10).",unit:"м/с",correct:25,options:["25","15","20","35"],
+ traps:{"15":{et:"INITIAL_FINAL",c:"15 — это только горизонтальная скорость.",sol:"<b>Формула:</b> v = √(vₓ² + v_y²)\n<b>Подстановка:</b> v_y = √(2gh) = 20; v = √(15² + 20²) = √625\n<b>Ответ:</b> 25 м/с"},
+        "20":{et:"INITIAL_FINAL",c:"20 — это только вертикальная скорость.",sol:"<b>v = 25 м/с</b>"},
+        "35":{et:"VECTOR",c:"Нужно по теореме Пифагора.",sol:"<b>v = 25 м/с</b>"}}},
+{id:113,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Период обращения тела по окружности равен 2 с. Радиус окружности 4 м. Найдите центростремительное ускорение (π² ≈ 10).",unit:"м/с²",correct:40,options:["40","20","80","10"],
+ traps:{"20":{et:"FORMULA",c:"Неверный расчёт.",sol:"<b>Формула:</b> a = (2π/T)²·R\n<b>Подстановка:</b> (π)²·4 = 10·4\n<b>Ответ:</b> 40 м/с²"},
+        "80":{et:"FORMULA",c:"Лишний множитель 2.",sol:"<b>a = 40 м/с²</b>"},
+        "10":{et:"FORMULA",c:"10 — это π².",sol:"<b>a = 40 м/с²</b>"}}},
+{id:114,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"При равноускоренном движении из состояния покоя тело за 4-ю секунду прошло 7 м. Найдите ускорение.",unit:"м/с²",correct:2,options:["2","4","1.75","3.5"],
+ traps:{"4":{et:"FORMULA",c:"s_n = a(2n−1)/2. 7 = a(2·4−1)/2 = 7a/2.",sol:"<b>Формула:</b> s_n = a(2n−1)/2\n<b>Подстановка:</b> 7 = a·7/2\n<b>Ответ:</b> a = 2 м/с²"},
+        "1.75":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>a = 2 м/с²</b>"},
+        "3.5":{et:"FORMULA",c:"Неверный подсчёт.",sol:"<b>a = 2 м/с²</b>"}}},
+{id:115,lvl:"ege",topic:"Кинематика (ЕГЭ)",text:"Эскалатор метро поднимает неподвижно стоящего человека за 1 мин. По неподвижному эскалатору человек поднимается за 3 мин. За какое время он поднимется, идя по движущемуся эскалатору?",unit:"мин",correct:0.75,options:["0.75","0.5","2","1.5"],
+ traps:{"0.5":{et:"FORMULA",c:"Неверный расчёт.",sol:"<b>Формула:</b> 1/t = 1/t₁ + 1/t₂\n<b>Подстановка:</b> 1/t = 1/1 + 1/3 = 4/3\n<b>Ответ:</b> t = 0,75 мин"},
+        "2":{et:"AVERAGE",c:"Среднее арифметическое не подходит.",sol:"<b>t = 0,75 мин</b>"},
+        "1.5":{et:"FORMULA",c:"Неверный расчёт.",sol:"<b>t = 0,75 мин</b>"}}}
 ];
 
 const THEORY = {
@@ -208,16 +276,17 @@ const store = {
   write(d){try{localStorage.setItem("fiziktest",JSON.stringify(d))}catch(e){}}
 };
 
-let state = Object.assign({attempts:[],errors:{},topic:"Все темы",theme:"light", studentName:""},store.read());
+let state = Object.assign({attempts:[],errors:{},topic:"Все темы",level:"school",theme:"light", studentName:""},store.read());
 if(!Array.isArray(state.attempts)) state.attempts=[];
 if(!state.errors||typeof state.errors!=="object") state.errors={};
+if(!state.level) state.level="school";
 if(!state.theme) state.theme="light";
 const save = () => store.write(state);
 
 let timeLeft = 0;
 let timerInterval = null;
 let timerPaused = false;
-const TIME_LIMIT = 15 * 60; // 15 минут
+const TIME_LIMITS = { school: 15 * 60, ege: 45 * 60 };
 
 function shuffleArray(array) {
   let currentIndex = array.length, randomIndex;
@@ -232,7 +301,7 @@ function shuffleArray(array) {
 function startTimer() {
   clearInterval(timerInterval);
   timerPaused = false;
-  timeLeft = TIME_LIMIT;
+  timeLeft = TIME_LIMITS[state.level];
   updateTimerDisplay();
   timerInterval = setInterval(() => {
     if (timerPaused) return;
@@ -311,10 +380,23 @@ function applyTheme() {
   }
 }
 
+function setLevel(lvl){
+  if(state.level === lvl && (solved+mistakes>0)) {
+    if(!confirm("Сменить уровень? Прогресс будет сброшен.")) return;
+  }
+  state.level = lvl;
+  save();
+  $("btnSchool").className = lvl==="school" ? "active" : "";
+  $("btnEGE").className = lvl==="ege" ? "active" : "";
+  buildTopics();
+  setTopic("Все темы");
+}
+
 function buildTopics(){
   const bar=$("topics");
   bar.innerHTML="";
-  const topics=["Все темы",...[...new Set(TASKS.map(t=>t.topic))].sort()];
+  const filteredTasks = TASKS.filter(t=>t.lvl===state.level);
+  const topics=["Все темы",...[...new Set(filteredTasks.map(t=>t.topic))].sort()];
   topics.forEach(tp=>{
     const b=document.createElement("button");
     b.type="button";
@@ -330,12 +412,13 @@ function buildTopics(){
 }
 
 function setTopic(tp){
-  const validTopics=["Все темы",...new Set(TASKS.map(t=>t.topic))];
+  const filteredTasks = TASKS.filter(t=>t.lvl===state.level);
+  const validTopics=["Все темы",...new Set(filteredTasks.map(t=>t.topic))];
   if(!validTopics.includes(tp)) tp="Все темы";
   state.topic=tp;
   save();
   
-  let baseQueue = TASKS.filter(t=>tp==="Все темы"||t.topic===tp);
+  let baseQueue = filteredTasks.filter(t=>tp==="Все темы"||t.topic===tp);
   queue = shuffleArray([...baseQueue]); 
   
   queue.forEach(t => {
@@ -349,7 +432,7 @@ function setTopic(tp){
   if (queue.length > 0) startTimer();
   else {
     clearInterval(timerInterval);
-    timeLeft = TIME_LIMIT;
+    timeLeft = TIME_LIMITS[state.level];
     updateTimerDisplay();
   }
   showTask();
@@ -437,14 +520,12 @@ function doCheck(){
     mistakes++;
     fb.className="show err";
     
-    // 1. Объяснение ошибки
     let html="<strong>❌ Неверно.</strong>";
     if(res.status==="trap") {
       html+="<div style='font-size:13px;color:var(--hint);margin-bottom:6px'>Тип ошибки: "+(ERR_NAMES[res.et]||res.et)+"</div>";
     }
     html+="<div>"+esc(res.comment)+"</div>";
     
-    // 2. Пошаговое решение
     if (res.sol) {
       const formattedSol = res.sol
         .replace(/<b>Формула:<\/b>/g, '<div class="formula">Формула:</div>')
@@ -513,13 +594,12 @@ function showFinish(){
 }
 
 function sendResultToTelegram(score, total) {
-  // ВСТАВЬТЕ СЮДА ВАШУ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
   const url = 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT'; 
   if (url === 'ВАША_ССЫЛКА_ИЗ_GOOGLE_APPS_SCRIPT') return;
 
   const data = {
     name: state.studentName || "Ученик",
-    level: "Школа",
+    level: state.level === "school" ? "Школа" : "ЕГЭ",
     score: score,
     total: total
   };
@@ -566,7 +646,7 @@ function showSupport(){
 function resetAll(){
   if(!confirm("Сбросить всю статистику и начать заново?"))return;
   state.attempts=[]; state.errors={}; state.studentName=""; save();
-  setTopic("Все темы");
+  setLevel(state.level);
 }
 
 function toggleMenu(e){
